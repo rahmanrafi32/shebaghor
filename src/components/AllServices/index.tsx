@@ -1,8 +1,8 @@
 import ServiceCard from "@/components/ServiceCard";
 
-const AllServices = () => {
+const AllServices = ({allServices}: any) => {
     return (
-        <ServiceCard serviceName={'All Services'}/>
+        <ServiceCard serviceType={'All Services'} serviceData={allServices}/>
     );
 };
 

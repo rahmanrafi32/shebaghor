@@ -1,7 +1,6 @@
-import {ReactNode, useState} from "react";
+import {ReactNode, useEffect, useState} from "react";
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
-import CssBaseline from '@mui/material/CssBaseline';
 import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
@@ -15,6 +14,14 @@ import MailIcon from '@mui/icons-material/Mail';
 import MenuIcon from '@mui/icons-material/Menu';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
+import {Avatar, Button, Link} from "@mui/material";
+import PersonIcon from "@mui/icons-material/Person";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import * as React from "react";
+import {useRouter} from "next/navigation";
+import isLoggedIn from "@/utils/isLoggedIn";
+import MoreIcon from '@mui/icons-material/MoreVert';
 
 type IProps = {
     children: ReactNode,
@@ -22,11 +29,40 @@ type IProps = {
 
 const drawerWidth = 240;
 const DashboardLayout = ({children}: IProps) => {
+    const router = useRouter();
+    const userLoggedIn = isLoggedIn();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
+    const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
+        React.useState<null | HTMLElement>(null);
 
+    const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+    const handleMobileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+        setMobileMoreAnchorEl(event.currentTarget);
+    };
+    const handleMobileMenuClose = () => {
+        setMobileMoreAnchorEl(null);
+    };
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
     };
+
+    const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorElUser(event.currentTarget);
+    };
+
+    const handleCloseUserMenu = () => {
+        setAnchorElUser(null);
+    };
+
+    useEffect(() => {
+        !userLoggedIn ? router.push('/login') : null
+    }, [router,userLoggedIn]);
+
+    const logout = () => {
+        handleMobileMenuClose();
+        localStorage.removeItem('token');
+    }
 
     const drawer = (
         <div>
@@ -60,16 +96,59 @@ const DashboardLayout = ({children}: IProps) => {
         </div>
     );
 
+    const mobileMenuId = 'primary-search-account-menu-mobile';
+    const renderMobileMenu = (
+        <Menu
+            anchorEl={mobileMoreAnchorEl}
+            anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right',
+            }}
+            id={mobileMenuId}
+            keepMounted
+            transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+            }}
+            open={isMobileMenuOpen}
+            onClose={handleMobileMenuClose}
+        >
+            <MenuItem>
+                <Link href={'/'} style={{color: '#000', textDecoration: 'none'}}>
+                    <Typography textAlign="center">Home</Typography>
+                </Link>
+            </MenuItem>
+            <MenuItem>
+                <Link href={'/profile'} style={{color: '#000', textDecoration: 'none'}}>
+                    <Typography textAlign="center">Profile</Typography>
+                </Link>
+            </MenuItem>
+            <MenuItem>
+                <Link href={'/all-services'} style={{color: '#000', textDecoration: 'none'}}>
+                    <Typography textAlign="center">All Services</Typography>
+                </Link>
+            </MenuItem>
+            <MenuItem>
+                <Link href={'/service-orders'} style={{color: '#000', textDecoration: 'none'}}>
+                    <Typography textAlign="center">Service Orders</Typography>
+                </Link>
+            </MenuItem>
+            <MenuItem onClick={() => logout()}>
+                <Typography textAlign="center">Logout</Typography>
+            </MenuItem>
+        </Menu>
+    );
+
 
     return (
         <Box sx={{display: 'flex'}}>
-            <CssBaseline/>
             <AppBar
                 position="fixed"
                 sx={{
                     width: {sm: `calc(100% - ${drawerWidth}px)`},
                     ml: {sm: `${drawerWidth}px`},
                 }}
+                color={'secondary'}
             >
                 <Toolbar>
                     <IconButton
@@ -81,9 +160,64 @@ const DashboardLayout = ({children}: IProps) => {
                     >
                         <MenuIcon/>
                     </IconButton>
-                    <Typography variant="h6" noWrap component="div">
-                        Responsive drawer
-                    </Typography>
+                    <Box sx={{flexGrow: 1}}/>
+                    <Box sx={{display: {xs: 'none', md: 'flex'}}}>
+                        <Link href={'/'}>
+                            <Button sx={{color: '#fff'}}>
+                                Home
+                            </Button>
+                        </Link>
+                        <Link href={'/all-services'}>
+                            <Button sx={{color: '#fff'}}>All Services </Button>
+                        </Link>
+                        <Box sx={{ml: 1}}>
+                            <Avatar onClick={handleOpenUserMenu}>
+                                <PersonIcon/>
+                            </Avatar>
+                            <Menu
+                                sx={{mt: '45px'}}
+                                id="menu-appbar"
+                                anchorEl={anchorElUser}
+                                anchorOrigin={{
+                                    vertical: 'top',
+                                    horizontal: 'right',
+                                }}
+                                keepMounted
+                                transformOrigin={{
+                                    vertical: 'top',
+                                    horizontal: 'right',
+                                }}
+                                open={Boolean(anchorElUser)}
+                                onClose={handleCloseUserMenu}
+                            >
+                                <MenuItem onClick={handleCloseUserMenu}>
+                                    <Link href={'/profile'} style={{color: '#000', textDecoration: 'none'}}>
+                                        <Typography textAlign="center">Profile</Typography>
+                                    </Link>
+                                </MenuItem>
+                                <MenuItem onClick={handleCloseUserMenu}>
+                                    <Typography textAlign="center">Service Orders</Typography>
+                                </MenuItem>
+                                <MenuItem onClick={() => logout()}>
+                                    <Typography textAlign="center">
+                                        Logout
+                                    </Typography>
+                                </MenuItem>
+                            </Menu>
+                        </Box>
+                    </Box>
+                    <Box sx={{display: {xs: 'flex', md: 'none'}}}>
+                        <IconButton
+                            size="large"
+                            aria-label="show more"
+                            aria-controls={mobileMenuId}
+                            aria-haspopup="true"
+                            onClick={handleMobileMenuOpen}
+                            color="inherit"
+                        >
+                            <MoreIcon/>
+                        </IconButton>
+                    </Box>
                 </Toolbar>
             </AppBar>
             <Box
@@ -123,6 +257,7 @@ const DashboardLayout = ({children}: IProps) => {
                 <Toolbar/>
                 {children}
             </Box>
+            {renderMobileMenu}
         </Box>
     );
 };

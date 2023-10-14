@@ -2,7 +2,6 @@ import React from 'react';
 import {Container, Typography, Link, Grid} from '@mui/material';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
-import Divider from "@mui/material/Divider";
 import Box from "@mui/material/Box";
 
 const Footer = () => {

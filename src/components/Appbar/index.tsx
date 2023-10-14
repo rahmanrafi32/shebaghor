@@ -10,10 +10,10 @@ import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
-import MailIcon from '@mui/icons-material/Mail';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import {Button, Link} from "@mui/material";
+import {Avatar, Button, Link} from "@mui/material";
 import {useEffect, useState} from "react";
+import isLoggedIn from "@/utils/isLoggedIn";
+import PersonIcon from '@mui/icons-material/Person';
 
 const Search = styled('div')(({theme}) => ({
     position: 'relative',
@@ -92,6 +92,12 @@ export default function Appbar() {
         setMobileMoreAnchorEl(event.currentTarget);
     };
 
+    const logout = () => {
+        handleCloseUserMenu();
+        handleMobileMenuClose();
+        localStorage.removeItem('token');
+    }
+
     const mobileMenuId = 'primary-search-account-menu-mobile';
     const renderMobileMenu = (
         <Menu
@@ -109,30 +115,34 @@ export default function Appbar() {
             onClose={handleMobileMenuClose}
         >
             <MenuItem>
-                <Link href={'/'} style={{color:'#000', textDecoration:'none'}}>
+                <Link href={'/'} style={{color: '#000', textDecoration: 'none'}}>
                     <Typography textAlign="center">Home</Typography>
                 </Link>
             </MenuItem>
             <MenuItem>
-                <Link href={'/profile'} style={{color:'#000', textDecoration:'none'}}>
+                <Link href={'/profile'} style={{color: '#000', textDecoration: 'none'}}>
                     <Typography textAlign="center">Profile</Typography>
                 </Link>
             </MenuItem>
             <MenuItem>
-                <Link href={'/all-services'} style={{color:'#000', textDecoration:'none'}}>
+                <Link href={'/all-services'} style={{color: '#000', textDecoration: 'none'}}>
                     <Typography textAlign="center">All Services</Typography>
                 </Link>
             </MenuItem>
             <MenuItem>
-                <Link href={'/service-orders'} style={{color:'#000', textDecoration:'none'}}>
+                <Link href={'/service-orders'} style={{color: '#000', textDecoration: 'none'}}>
                     <Typography textAlign="center">Service Orders</Typography>
                 </Link>
             </MenuItem>
-            <MenuItem>
-                <Link href={'/login'} style={{color:'#000', textDecoration:'none'}}>
-                    <Typography textAlign="center">Login</Typography>
-                </Link>
-            </MenuItem>
+            {
+                !isLoggedIn() ? (<MenuItem>
+                    <Link href={'/login'} style={{color: '#000', textDecoration: 'none'}}>
+                        <Typography textAlign="center">Login</Typography>
+                    </Link>
+                </MenuItem>) : (<MenuItem onClick={() => logout()}>
+                    <Typography textAlign="center">Logout</Typography>
+                </MenuItem>)
+            }
         </Menu>
     );
 
@@ -140,14 +150,16 @@ export default function Appbar() {
         <Box sx={{flexGrow: 1}}>
             <AppBar position="fixed" color={'secondary'}>
                 <Toolbar>
-                    <Typography
-                        variant="h4"
-                        noWrap
-                        component="div"
-                        sx={{display: {xs: 'none', sm: 'block'}}}
-                    >
-                        Sheba Ghor
-                    </Typography>
+                    <Link href={'/'} style={{color: '#fff', textDecoration: 'none'}}>
+                        <Typography
+                            variant="h4"
+                            noWrap
+                            component="div"
+                            sx={{display: {xs: 'none', sm: 'block'}}}
+                        >
+                            Sheba Ghor
+                        </Typography>
+                    </Link>
                     {
                         !showSearchBar ? <Box sx={{flexGrow: 1}}/> : null
                     }
@@ -174,44 +186,47 @@ export default function Appbar() {
                         <Link href={'/all-services'}>
                             <Button sx={{color: '#fff'}}>All Services </Button>
                         </Link>
-                        <Link href={'/login'}>
-                            <Button sx={{color: '#fff'}}>
-                                Login
-                            </Button>
-                        </Link>
-                        <Box>
-                            <Button onClick={handleOpenUserMenu} sx={{color: '#fff'}}>
-                                User
-                            </Button>
-                            <Menu
-                                sx={{mt: '45px'}}
-                                id="menu-appbar"
-                                anchorEl={anchorElUser}
-                                anchorOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'right',
-                                }}
-                                keepMounted
-                                transformOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'right',
-                                }}
-                                open={Boolean(anchorElUser)}
-                                onClose={handleCloseUserMenu}
-                            >
-                                <MenuItem onClick={handleCloseUserMenu}>
-                                    <Link href={'/profile'} style={{color:'#000', textDecoration:'none'}}>
-                                        <Typography textAlign="center">Profile</Typography>
-                                    </Link>
+                        {
+                            !isLoggedIn() ? (<Link href={'/login'}>
+                                <Button sx={{color: '#fff'}}>
+                                    Login
+                                </Button>
+                            </Link>) : (<Box sx={{ml:1}}>
+                                <Avatar onClick={handleOpenUserMenu}>
+                                    <PersonIcon/>
+                                </Avatar>
+                                <Menu
+                                    sx={{mt: '45px'}}
+                                    id="menu-appbar"
+                                    anchorEl={anchorElUser}
+                                    anchorOrigin={{
+                                        vertical: 'top',
+                                        horizontal: 'right',
+                                    }}
+                                    keepMounted
+                                    transformOrigin={{
+                                        vertical: 'top',
+                                        horizontal: 'right',
+                                    }}
+                                    open={Boolean(anchorElUser)}
+                                    onClose={handleCloseUserMenu}
+                                >
+                                    <MenuItem onClick={handleCloseUserMenu}>
+                                        <Link href={'/profile'} style={{color: '#000', textDecoration: 'none'}}>
+                                            <Typography textAlign="center">Profile</Typography>
+                                        </Link>
+                                    </MenuItem>
+                                    <MenuItem onClick={handleCloseUserMenu}>
+                                        <Typography textAlign="center">Service Orders</Typography>
+                                    </MenuItem><
+                                    MenuItem onClick={() => logout()}>
+                                    <Typography textAlign="center">
+                                        Logout
+                                    </Typography>
                                 </MenuItem>
-                                <MenuItem onClick={handleCloseUserMenu}>
-                                    <Typography textAlign="center">Service Orders</Typography>
-                                </MenuItem><
-                                MenuItem onClick={handleCloseUserMenu}>
-                                <Typography textAlign="center">Logout</Typography>
-                            </MenuItem>
-                            </Menu>
-                        </Box>
+                                </Menu>
+                            </Box>)
+                        }
                     </Box>
                     <Box sx={{display: {xs: 'flex', md: 'none'}}}>
                         <IconButton

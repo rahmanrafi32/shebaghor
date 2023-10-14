@@ -2,7 +2,7 @@ import ServiceCard from "@/components/ServiceCard";
 
 const UpcomingServices = () => {
     return (
-        <ServiceCard serviceName={'Upcoming Services'}/>
+        <ServiceCard serviceType={'Upcoming Services'}/>
     );
 };
 

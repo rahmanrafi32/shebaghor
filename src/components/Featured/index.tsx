@@ -2,7 +2,7 @@ import ServiceCard from "@/components/ServiceCard";
 
 const FeaturedService = () => {
     return (
-        <ServiceCard serviceName={'Featured Services'}/>
+        <ServiceCard serviceType={'Featured Services'}/>
     );
 };
 
