@@ -2,8 +2,6 @@ import {Fragment, ReactNode, useEffect, useState} from "react";
 import Appbar from "@/components/Appbar";
 import Footer from "@/components/Footer";
 import Toolbar from "@mui/material/Toolbar";
-import isLoggedIn from "@/utils/isLoggedIn";
-import {useRouter} from "next/navigation";
 import CircularProgress from '@mui/material/CircularProgress';
 
 type IProps = {

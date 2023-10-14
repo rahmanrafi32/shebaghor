@@ -3,8 +3,8 @@ import RootLayout from "@/components/layouts/RootLayout";
 import {GetStaticProps} from "next";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
-import {Link} from "@mui/material";
 import Image from "next/image";
+import Link from 'next/link'
 
 type IService = {
     id: string,

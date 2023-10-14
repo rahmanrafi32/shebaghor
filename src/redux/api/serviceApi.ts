@@ -27,7 +27,15 @@ export const serviceApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: ["service"],
         }),
+        addService: build.mutation({
+            query: (payload) => ({
+                url: `${URL}/create-service`,
+                method: "POST",
+                data: payload
+            }),
+            invalidatesTags: ["service"],
+        }),
     }),
 })
 
-export const {useGetAllServicesQuery, useAddReviewMutation, useGetServiceByIdQuery} = serviceApi
+export const {useGetAllServicesQuery, useAddReviewMutation, useGetServiceByIdQuery, useAddServiceMutation} = serviceApi

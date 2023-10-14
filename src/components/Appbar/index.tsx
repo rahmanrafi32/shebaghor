@@ -10,10 +10,11 @@ import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
-import {Avatar, Button, Link} from "@mui/material";
+import {Avatar, Button} from "@mui/material";
 import {useEffect, useState} from "react";
 import isLoggedIn from "@/utils/isLoggedIn";
 import PersonIcon from '@mui/icons-material/Person';
+import Link from 'next/link'
 
 const Search = styled('div')(({theme}) => ({
     position: 'relative',
@@ -192,7 +193,7 @@ export default function Appbar() {
                                     Login
                                 </Button>
                             </Link>) : (<Box sx={{ml:1}}>
-                                <Avatar onClick={handleOpenUserMenu}>
+                                <Avatar sx={{cursor: 'pointer'}} onClick={handleOpenUserMenu}>
                                     <PersonIcon/>
                                 </Avatar>
                                 <Menu

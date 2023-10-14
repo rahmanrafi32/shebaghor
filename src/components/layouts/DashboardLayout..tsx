@@ -14,7 +14,7 @@ import MailIcon from '@mui/icons-material/Mail';
 import MenuIcon from '@mui/icons-material/Menu';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import {Avatar, Button, Link} from "@mui/material";
+import {Avatar, Button} from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
@@ -22,10 +22,49 @@ import * as React from "react";
 import {useRouter} from "next/navigation";
 import isLoggedIn from "@/utils/isLoggedIn";
 import MoreIcon from '@mui/icons-material/MoreVert';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import LocalMallIcon from '@mui/icons-material/LocalMall';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
+import Link from 'next/link'
 
 type IProps = {
     children: ReactNode,
 }
+
+const adminMenu = [
+    {
+        name: 'Manage Service',
+        icon: <DashboardIcon/>,
+        link: '/manage-service'
+    },
+    {
+        name: 'Manage User',
+        icon: <AccountCircleIcon/>,
+        link: '/manage-user'
+    },
+    {
+        name: 'Manage Bookings',
+        icon: <LocalMallIcon/>,
+        link: '/manage-bookings'
+    },
+    {
+        name: 'Manage Content',
+        icon: <FileCopyIcon/>,
+        link: '/manage-content'
+    },
+]
+
+const userMenu = [
+    {
+        name: 'Manage Profile',
+        icon: <AccountCircleIcon/>
+    },
+    {
+        name: 'Bookings',
+        icon: <LocalMallIcon/>
+    },
+]
 
 const drawerWidth = 240;
 const DashboardLayout = ({children}: IProps) => {
@@ -57,7 +96,7 @@ const DashboardLayout = ({children}: IProps) => {
 
     useEffect(() => {
         !userLoggedIn ? router.push('/login') : null
-    }, [router,userLoggedIn]);
+    }, [router, userLoggedIn]);
 
     const logout = () => {
         handleMobileMenuClose();
@@ -69,28 +108,17 @@ const DashboardLayout = ({children}: IProps) => {
             <Toolbar/>
             <Divider/>
             <List>
-                {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-                    <ListItem key={text} disablePadding>
-                        <ListItemButton>
-                            <ListItemIcon>
-                                {index % 2 === 0 ? <InboxIcon/> : <MailIcon/>}
-                            </ListItemIcon>
-                            <ListItemText primary={text}/>
-                        </ListItemButton>
-                    </ListItem>
-                ))}
-            </List>
-            <Divider/>
-            <List>
-                {['All mail', 'Trash', 'Spam'].map((text, index) => (
-                    <ListItem key={text} disablePadding>
-                        <ListItemButton>
-                            <ListItemIcon>
-                                {index % 2 === 0 ? <InboxIcon/> : <MailIcon/>}
-                            </ListItemIcon>
-                            <ListItemText primary={text}/>
-                        </ListItemButton>
-                    </ListItem>
+                {adminMenu.map((item, index) => (
+                    <Link key={index} href={`/dashboard${item.link}`} style={{textDecoration:'none', color:'#000'}}>
+                        <ListItem disablePadding>
+                            <ListItemButton>
+                                <ListItemIcon>
+                                    {item.icon}
+                                </ListItemIcon>
+                                <ListItemText primary={item.name}/>
+                            </ListItemButton>
+                        </ListItem>
+                    </Link>
                 ))}
             </List>
         </div>
@@ -171,7 +199,7 @@ const DashboardLayout = ({children}: IProps) => {
                             <Button sx={{color: '#fff'}}>All Services </Button>
                         </Link>
                         <Box sx={{ml: 1}}>
-                            <Avatar onClick={handleOpenUserMenu}>
+                            <Avatar sx={{cursor: 'pointer'}} onClick={handleOpenUserMenu}>
                                 <PersonIcon/>
                             </Avatar>
                             <Menu
