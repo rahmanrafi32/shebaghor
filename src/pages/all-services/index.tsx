@@ -57,7 +57,8 @@ AllServicesPage.getLayout = function getLayout(page: ReactElement) {
 }
 
 export const getStaticProps: GetStaticProps = async () => {
-    const response = await fetch('http://localhost:8080/api/v1/services');
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL as string;
+    const response = await fetch(`${baseUrl}/services`);
     const data = await response.json();
     return {
         props: {

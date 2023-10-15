@@ -1,27 +1,40 @@
-import {ReactElement, useState} from "react";
+import {ReactElement, useEffect, useState} from "react";
 import RootLayout from "@/components/layouts/RootLayout";
 import Box from "@mui/material/Box";
 import Image from "next/image";
 import Typography from "@mui/material/Typography";
-import {Avatar, Button, Container} from "@mui/material";
+import Avatar from "@mui/material/Avatar";
+import Button from "@mui/material/Button";
+import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import PersonIcon from '@mui/icons-material/Person';
 import TextField from "@mui/material/TextField";
 import {useAddReviewMutation, useGetServiceByIdQuery} from "@/redux/api/serviceApi";
 import {useRouter} from "next/router";
 import CircularProgress from '@mui/material/CircularProgress';
+import {getUserInfo} from "@/utils/getUserInfo";
 
 const Service = () => {
     const {query} = useRouter();
-    const {data, isLoading} = useGetServiceByIdQuery(query.id);
-
+    const id = query.id as string;
+    const {data, isLoading} = useGetServiceByIdQuery(id);
     const [visibleReviews, setVisibleReviews] = useState(5);
+    const {user_email} = getUserInfo();
+
     const [reviews, setReviews] = useState({
-        reviewer: 'Mahfuz Rahman',
+        reviewer: '',
         review: '',
-        id: query.id
+        id: ''
     });
     const [addReview] = useAddReviewMutation();
+
+    useEffect(() => {
+        setReviews((prevReviews) => ({
+            ...prevReviews,
+            reviewer: user_email,
+            id,
+        }));
+    }, [id, user_email]);
 
     const onReviewSubmit = async () => {
         const res = await addReview(reviews).unwrap();
@@ -42,6 +55,7 @@ const Service = () => {
                     alt="Banner Image"
                     layout="fill"
                     objectFit="cover"
+                    style={{filter: 'brightness(40%)'}}
                 />
                 <Box
                     sx={{
@@ -84,13 +98,27 @@ const Service = () => {
                     }
                 </ul>
             </Container>
+            <Container>
+                <Typography sx={{fontWeight: 'bold'}} variant={'h6'}>Service Details</Typography>
+                <Typography>{data?.data?.details}</Typography>
+            </Container>
+            <Container sx={{mt: 2}}>
+                <Typography sx={{fontWeight: 'bold'}} variant={'h6'}>Service Rating</Typography>
+                <Box sx={{display: 'flex', alignItems: 'flex-end'}}>
+                    <Typography sx={{fontWeight: 'bold'}} variant={'h4'}>{data?.data?.ratings}.0</Typography>
+                    <Typography sx={{ml: 1}}>Out of 5</Typography>
+                </Box>
+            </Container>
             <Box sx={{display: 'flex', justifyContent: 'center', mt: 5, mb: 5}}>
                 <Typography variant={'h4'}>Reviews</Typography>
             </Box>
             <Container>
                 <Grid container direction={'column'} alignItems={'start'}>
                     {
-                        data?.data?.reviews.slice(0, visibleReviews).map((item: { reviewer: string, review: string }, index: number) => (
+                        data?.data?.reviews.slice(0, visibleReviews).map((item: {
+                            reviewer: string,
+                            review: string
+                        }, index: number) => (
                             <Grid
                                 item
                                 key={index}

@@ -1,5 +1,5 @@
-import {ChangeEvent, ReactElement, useState} from "react";
-import DashboardLayout from "@/components/layouts/DashboardLayout.";
+import React, {ChangeEvent, ReactElement, useState} from "react";
+import DashboardLayout from "@/components/layouts/DashboardLayout";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
@@ -11,6 +11,8 @@ import {styled} from "@mui/material/styles";
 import axios from "axios";
 import Image from "next/image";
 import {useAddServiceMutation} from "@/redux/api/serviceApi";
+import {useRouter} from "next/router";
+import CustomSnackBar from "@/components/CustomSnackbar";
 
 interface ServiceData {
     name: string;
@@ -19,6 +21,7 @@ interface ServiceData {
     category: string;
     whatsInclude: string[];
     whatsExclude: string[];
+    details: string;
 }
 
 const VisuallyHiddenInput = styled('input')({
@@ -41,22 +44,30 @@ const AddService = () => {
         category: '',
         whatsInclude: [''],
         whatsExclude: [''],
+        details: ''
     });
+    const router = useRouter();
+    const [open, setOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState("");
+    const [severity, setSeverity] = useState('success');
 
     const [createService] = useAddServiceMutation();
     const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
+        const uploadPreset = process.env.NEXT_PUBLIC_UPLOAD_PRESET as string;
+        const cloudName = process.env.NEXT_PUBLIC_CLOUD_NAME as string;
         if (file) {
             try {
                 const formData = new FormData();
-                formData.append('upload_preset', 'rpmssokb');
+                formData.append('upload_preset', uploadPreset);
                 formData.append('file', file);
                 let config = {
                     method: 'POST',
-                    url: 'https://api.cloudinary.com/v1_1/dttxxnsvp/image/upload',
+                    url: `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
                     data: formData
                 };
                 const response = await axios.request(config);
+                console.log('response for image', response)
                 if (response && response.data && response.data.secure_url) {
                     const imageUrl = response.data.secure_url;
                     setServiceData((prevServiceData) => ({
@@ -98,6 +109,14 @@ const AddService = () => {
     const handleSubmit = async () => {
         try {
             const response = await createService(serviceData).unwrap();
+            if (response.success) {
+                setOpen(true);
+                setSeverity('success');
+                setSnackbarMessage(response.message)
+                setTimeout(() => {
+                    router.push('/dashboard/manage-service');
+                }, 2100);
+            }
         } catch (error) {
             console.error('Error creating service:', error);
         }
@@ -124,7 +143,6 @@ const AddService = () => {
                                 alt={'service image'}
                                 width={200}
                                 height={200}
-                                style={{marginLeft: '20px'}}
                             /> : null
                         }
                         <Button
@@ -137,7 +155,7 @@ const AddService = () => {
                             <VisuallyHiddenInput type="file" onChange={handleFileChange}/>
                         </Button>
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid item xs={6}>
                         <TextField
                             label="Price"
                             fullWidth
@@ -145,12 +163,22 @@ const AddService = () => {
                             onChange={handleChange('price')}
                         />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid item xs={6}>
                         <TextField
                             label="Category"
                             fullWidth
                             value={serviceData.category}
                             onChange={handleChange('category')}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <TextField
+                            label="Service Details"
+                            fullWidth
+                            multiline
+                            maxRows={4}
+                            value={serviceData.details}
+                            onChange={handleChange('details')}
                         />
                     </Grid>
                     <Grid item xs={12}>
@@ -206,13 +234,24 @@ const AddService = () => {
                             variant="contained"
                             color="primary"
                             onClick={handleSubmit}
-                            disabled={serviceData.name === '' || serviceData.image === '' || serviceData.price === '' || serviceData.category === ''}
+                            disabled={
+                                serviceData.name === '' ||
+                                serviceData.image === '' ||
+                                serviceData.price === '' ||
+                                serviceData.category === ''
+                            }
                         >
                             Create Service
                         </Button>
                     </Grid>
                 </Grid>
             </form>
+            <CustomSnackBar
+                open={open}
+                setOpen={setOpen}
+                message={snackbarMessage}
+                severity={severity}
+            />
         </Container>
     );
 };

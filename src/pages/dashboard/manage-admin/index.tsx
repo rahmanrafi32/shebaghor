@@ -1,18 +1,18 @@
 import {ReactElement, SyntheticEvent, useState} from "react";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
-import Typography from "@mui/material/Typography";
-import Link from "next/link";
-import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
-import CircularProgress from "@mui/material/CircularProgress";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import Link from "next/link";
 import MUIDataTable from "mui-datatables";
-import DeleteServiceModal from "@/components/DeleteServiceModal";
-import EditUserModal from "@/components/EditModal";
-import CustomSnackBar from "@/components/CustomSnackbar";
 import IconButton from "@mui/material/IconButton";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import {useDeleteUserMutation, useEditUserMutation, useGetAllUsersQuery} from "@/redux/api/superAdminApi";
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import {useDeleteAdminMutation, useGetAllAdminsQuery, useManageAdminRoleMutation} from "@/redux/api/superAdminApi";
+import CircularProgress from "@mui/material/CircularProgress";
+import DeleteServiceModal from "@/components/DeleteServiceModal";
+import CustomSnackBar from "@/components/CustomSnackbar";
+import EditUserModal from "@/components/EditModal";
 
 type User = {
     firstName: string;
@@ -22,8 +22,7 @@ type User = {
     contactNo: string;
     id: string;
 };
-
-const ManageUsers = () => {
+const ManageAdmin = () => {
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
     const [modalMessage, setModalMessage] = useState<string>('')
@@ -33,11 +32,11 @@ const ManageUsers = () => {
     const [isEditModalOpen, setEditModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-    const {data: allUsers, isLoading} = useGetAllUsersQuery({});
-    const [deleteUser] = useDeleteUserMutation();
-    const [editUserDetails] = useEditUserMutation();
+    const {data: allAdmins, isLoading} = useGetAllAdminsQuery({});
+    const [deleteAdmin] = useDeleteAdminMutation();
+    const [manageAdminRole] = useManageAdminRoleMutation();
 
-    const tableData = allUsers?.data?.map((item: User) => [
+    const tableData = allAdmins?.data?.map((item: Partial<User>) => [
         item.firstName,
         item.lastName,
         item.contactNo,
@@ -96,7 +95,7 @@ const ManageUsers = () => {
     };
 
     const handleConfirmEdit = async (editedUser: Partial<User>) => {
-        const response = await editUserDetails(editedUser).unwrap();
+        const response = await manageAdminRole(editedUser).unwrap();
         if (response.success) {
             setOpen(true);
             setSeverity('success');
@@ -111,13 +110,13 @@ const ManageUsers = () => {
 
     const handleDelete = (id: string) => {
         setSelectedUserId(id);
-        setModalMessage('Are you sure you want to delete this user?')
+        setModalMessage('Are you sure you want to delete this admin?')
         setDeleteModalOpen(true);
     }
 
     const handleConfirmDelete = async () => {
         if (selectedUserId) {
-            const response = await deleteUser(selectedUserId).unwrap();
+            const response = await deleteAdmin(selectedUserId).unwrap();
             if (response.success) {
                 setOpen(true);
                 setSeverity('success');
@@ -130,11 +129,12 @@ const ManageUsers = () => {
     const handleCloseModal = () => {
         setDeleteModalOpen(false);
     };
+
     return (
         <Box sx={{display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
-            <Typography variant={'h4'}>Manage Users</Typography>
-            <Link href={'/dashboard/manage-user/add-user'} style={{width: '10vw'}}>
-                <Button variant={'contained'} sx={{mt: 3, mb: 3, mr: 3}} size={'large'}>Add User</Button>
+            <Typography variant={'h4'}>Manage Admins</Typography>
+            <Link href={'/dashboard/manage-admin/add-admin'} style={{width: '10vw'}}>
+                <Button variant={'contained'} sx={{mt: 3, mb: 3, mr: 3}} size={'large'}>Add Admins</Button>
             </Link>
             {
                 isLoading ? <Box sx={{display: 'flex', justifyContent: 'center'}}>
@@ -143,7 +143,7 @@ const ManageUsers = () => {
                     data={tableData}
                     columns={columns}
                     options={options}
-                    title={"Users List"}
+                    title={"Admins List"}
                 />
             }
             <DeleteServiceModal
@@ -163,8 +163,8 @@ const ManageUsers = () => {
     );
 };
 
-export default ManageUsers;
+export default ManageAdmin;
 
-ManageUsers.getLayout = function getLayout(page: ReactElement) {
+ManageAdmin.getLayout = function getLayout(page: ReactElement) {
     return (<DashboardLayout>{page}</DashboardLayout>)
 }

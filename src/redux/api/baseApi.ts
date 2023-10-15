@@ -1,10 +1,11 @@
-import { createApi } from '@reduxjs/toolkit/query/react'
+import {createApi} from '@reduxjs/toolkit/query/react'
 import {axiosBaseQuery} from "@/helpers/axiosBaseQuery";
 
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL as string
 export const baseApi = createApi({
     reducerPath: 'api',
-    baseQuery: axiosBaseQuery({ baseUrl: `http://localhost:8080/api/v1` }),
-    tagTypes: ['service'],
+    baseQuery: axiosBaseQuery({baseUrl}),
+    tagTypes: ['service', 'admin','user'],
     endpoints: () => ({}),
 })
 

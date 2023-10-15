@@ -1,16 +1,14 @@
-import {ReactNode, useEffect, useState} from "react";
+import {JSX, ReactNode, useEffect, useState} from "react";
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import MailIcon from '@mui/icons-material/Mail';
 import MenuIcon from '@mui/icons-material/Menu';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -22,49 +20,19 @@ import * as React from "react";
 import {useRouter} from "next/navigation";
 import isLoggedIn from "@/utils/isLoggedIn";
 import MoreIcon from '@mui/icons-material/MoreVert';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import LocalMallIcon from '@mui/icons-material/LocalMall';
-import FileCopyIcon from '@mui/icons-material/FileCopy';
 import Link from 'next/link'
+import {getUserInfo} from "@/utils/getUserInfo";
+import {adminMenu, superAdmin, userMenu} from "@/constants/DrawerMenu";
 
 type IProps = {
     children: ReactNode,
 }
 
-const adminMenu = [
-    {
-        name: 'Manage Service',
-        icon: <DashboardIcon/>,
-        link: '/manage-service'
-    },
-    {
-        name: 'Manage User',
-        icon: <AccountCircleIcon/>,
-        link: '/manage-user'
-    },
-    {
-        name: 'Manage Bookings',
-        icon: <LocalMallIcon/>,
-        link: '/manage-bookings'
-    },
-    {
-        name: 'Manage Content',
-        icon: <FileCopyIcon/>,
-        link: '/manage-content'
-    },
-]
-
-const userMenu = [
-    {
-        name: 'Manage Profile',
-        icon: <AccountCircleIcon/>
-    },
-    {
-        name: 'Bookings',
-        icon: <LocalMallIcon/>
-    },
-]
+interface DrawerItem {
+    name: string;
+    icon: JSX.Element;
+    link: string;
+}
 
 const drawerWidth = 240;
 const DashboardLayout = ({children}: IProps) => {
@@ -74,8 +42,9 @@ const DashboardLayout = ({children}: IProps) => {
     const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
     const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
         React.useState<null | HTMLElement>(null);
-
+    const [drawerItems, setDrawerItems] = useState<DrawerItem[]>([]);
     const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+    const {role} = getUserInfo() as any;
     const handleMobileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
         setMobileMoreAnchorEl(event.currentTarget);
     };
@@ -100,16 +69,26 @@ const DashboardLayout = ({children}: IProps) => {
 
     const logout = () => {
         handleMobileMenuClose();
+        handleCloseUserMenu();
         localStorage.removeItem('token');
     }
+
+    useEffect(() => {
+        const {role} = getUserInfo() as any;
+        if (role === 'user') {
+            setDrawerItems(userMenu);
+        } else if (role === 'admin') {
+            setDrawerItems(adminMenu);
+        } else setDrawerItems(superAdmin)
+    }, []);
 
     const drawer = (
         <div>
             <Toolbar/>
             <Divider/>
             <List>
-                {adminMenu.map((item, index) => (
-                    <Link key={index} href={`/dashboard${item.link}`} style={{textDecoration:'none', color:'#000'}}>
+                {drawerItems.map((item, index) => (
+                    <Link key={index} href={`/dashboard${item.link}`} style={{textDecoration: 'none', color: '#000'}}>
                         <ListItem disablePadding>
                             <ListItemButton>
                                 <ListItemIcon>
@@ -156,11 +135,20 @@ const DashboardLayout = ({children}: IProps) => {
                     <Typography textAlign="center">All Services</Typography>
                 </Link>
             </MenuItem>
-            <MenuItem>
-                <Link href={'/service-orders'} style={{color: '#000', textDecoration: 'none'}}>
-                    <Typography textAlign="center">Service Orders</Typography>
-                </Link>
-            </MenuItem>
+            {
+                role === 'admin' || role === 'super_admin' ? (
+                    <MenuItem>
+                        <Link href={'/dashboard'} style={{color: '#000', textDecoration: 'none'}}>
+                            <Typography textAlign="center">Dashboard</Typography>
+                        </Link>
+                    </MenuItem>) : (
+                    <MenuItem>
+                        <Link href={'/service-orders'} style={{color: '#000', textDecoration: 'none'}}>
+                            <Typography textAlign="center">Service Orders</Typography>
+                        </Link>
+                    </MenuItem>
+                )
+            }
             <MenuItem onClick={() => logout()}>
                 <Typography textAlign="center">Logout</Typography>
             </MenuItem>
@@ -223,9 +211,20 @@ const DashboardLayout = ({children}: IProps) => {
                                         <Typography textAlign="center">Profile</Typography>
                                     </Link>
                                 </MenuItem>
-                                <MenuItem onClick={handleCloseUserMenu}>
-                                    <Typography textAlign="center">Service Orders</Typography>
-                                </MenuItem>
+                                {
+                                    role === 'admin' || role === 'super_admin' ? (
+                                        <MenuItem>
+                                            <Link href={'/dashboard'} style={{color: '#000', textDecoration: 'none'}}>
+                                                <Typography textAlign="center">Dashboard</Typography>
+                                            </Link>
+                                        </MenuItem>) : (
+                                        <MenuItem>
+                                            <Link href={'/service-orders'} style={{color: '#000', textDecoration: 'none'}}>
+                                                <Typography textAlign="center">Service Orders</Typography>
+                                            </Link>
+                                        </MenuItem>
+                                    )
+                                }
                                 <MenuItem onClick={() => logout()}>
                                     <Typography textAlign="center">
                                         Logout

@@ -1,6 +1,6 @@
 'use client'
 import Image from "next/image";
-import BannerImage from '../../assets/colorful-2174045_1280.webp'
+import BannerImage from '../../assets/banner_image.jpg'
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 
@@ -12,6 +12,7 @@ const Banner = () => {
                 alt="Banner Image"
                 layout="fill"
                 objectFit="cover"
+                style={{ filter: 'brightness(40%)' }}
             />
             <Box
                 sx={{

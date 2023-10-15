@@ -3,13 +3,18 @@ import Typography from "@mui/material/Typography";
 import loginImage from '../../assets/12146011_Wavy_Gen-01_Single-07.jpg'
 import Image from "next/image";
 import TextField from "@mui/material/TextField";
-import {Button} from "@mui/material";
+import {Button, InputAdornment} from "@mui/material";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {z} from 'zod';
 import {useUserLoginMutation} from "@/redux/api/authApi";
 import {useRouter} from "next/navigation";
 import {setToLocalStorage} from "@/utils/local-storage";
+import {useState} from "react";
+import IconButton from "@mui/material/IconButton";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import jwt_decode from "jwt-decode";
 
 const schema = z.object({
     email: z.string().min(1, {message: "Email is Required"}).email("Enter a valid email"),
@@ -21,8 +26,11 @@ type FormValues = {
     password: string;
 }
 const Login = () => {
+    const [showPassword, setShowPassword] = useState(false);
     const [userLogin] = useUserLoginMutation();
     const router = useRouter();
+
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
 
     const {register, handleSubmit, formState} = useForm<FormValues>({
         defaultValues: {
@@ -33,13 +41,15 @@ const Login = () => {
     })
     const {errors} = formState;
     const onSubmit = async (data: FormValues) => {
-        const res = await userLogin({ ...data }).unwrap();
-        if(res.success){
+        const res = await userLogin({...data}).unwrap();
+        if (res.success) {
+            const decoded = jwt_decode(res.data);
             setToLocalStorage('token', res.data);
+            setToLocalStorage('user_email', decoded?.user);
+            setToLocalStorage('user_role', decoded?.role);
             router.push('/');
         }
     }
-
     return (
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
             <Grid
@@ -83,12 +93,26 @@ const Login = () => {
                     <TextField
                         placeholder={'Enter password'}
                         label={'Password'}
+                        type={showPassword ? 'text' : 'password'}
                         sx={{mb: 5, width: {md: '30vw', xs: '80vw'}}}
                         {...register('password', {
                             required: "Email is required"
                         })}
                         error={!!errors.password}
                         helperText={errors.password?.message}
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        aria-label="toggle password visibility"
+                                        onClick={handleClickShowPassword}
+                                        edge="end"
+                                    >
+                                        {showPassword ? <VisibilityOff/> : <Visibility/>}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
                     />
                     <Button type={'submit'} size={'large'} variant={'contained'}>Submit</Button>
                 </Grid>

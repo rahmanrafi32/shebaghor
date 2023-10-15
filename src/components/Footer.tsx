@@ -19,7 +19,7 @@ const Footer = () => {
                                 Phone: +1 (123) 456-7890
                             </Typography>
                             <Typography variant="body1">
-                                Email: contact@company.com
+                                Email: contact@shebaghor.com
                             </Typography>
                         </Grid>
                         <Grid item xs={12} sm={6} sx={{display: 'flex', justifyContent: {md: 'flex-end'}, mt: {xs: 5}}}>
