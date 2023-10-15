@@ -13,13 +13,14 @@ import {useAddReviewMutation, useGetServiceByIdQuery} from "@/redux/api/serviceA
 import {useRouter} from "next/router";
 import CircularProgress from '@mui/material/CircularProgress';
 import {getUserInfo} from "@/utils/getUserInfo";
+import Link from "next/link";
 
 const Service = () => {
     const {query} = useRouter();
     const id = query.id as string;
     const {data, isLoading} = useGetServiceByIdQuery(id);
     const [visibleReviews, setVisibleReviews] = useState(5);
-    const {user_email} = getUserInfo();
+    const {user_email}: any = getUserInfo();
 
     const [reviews, setReviews] = useState({
         reviewer: '',
@@ -43,11 +44,7 @@ const Service = () => {
         }
     }
 
-    return isLoading ? (
-        <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh'}}>
-            <CircularProgress/>
-        </div>
-    ) : (
+    return (
         <Box>
             <Box sx={{position: 'relative', width: '100%', height: '550px'}}>
                 <Image
@@ -68,15 +65,17 @@ const Service = () => {
                     }}
                 >
                     <Typography variant={'h2'}>{data?.data?.name}</Typography>
-                    <Typography variant={'h4'}>Price: {data?.data?.price}</Typography>
-                    <Button
-                        variant={'contained'}
-                        size={'large'}
-                        color={'secondary'}
-                        sx={{mt: 7}}
-                    >
-                        Order service
-                    </Button>
+                    <Typography variant={'h4'}>Price: ${data?.data?.price}</Typography>
+                    <Link href={`/checkout/${data?.data?.id}`}>
+                        <Button
+                            variant={'contained'}
+                            size={'large'}
+                            color={'secondary'}
+                            sx={{mt: 5}}
+                        >
+                            Book Now
+                        </Button>
+                    </Link>
                 </Box>
             </Box>
             <Box sx={{display: 'flex', justifyContent: 'center', m: 5}}>
