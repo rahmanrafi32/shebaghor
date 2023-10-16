@@ -1,4 +1,4 @@
-import {ReactElement, SyntheticEvent, useState} from "react";
+import {ReactElement, SyntheticEvent, useEffect, useState} from "react";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import Typography from "@mui/material/Typography";
 import Link from "next/link";
@@ -13,6 +13,8 @@ import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {useDeleteUserMutation, useEditUserMutation, useGetAllUsersQuery} from "@/redux/api/superAdminApi";
+import {getUserInfo} from "@/utils/getUserInfo";
+import {useRouter} from "next/navigation";
 
 type User = {
     firstName: string;
@@ -32,6 +34,8 @@ const ManageUsers = () => {
     const [severity, setSeverity] = useState('success');
     const [isEditModalOpen, setEditModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
+    const user = getUserInfo() as any;
+    const router = useRouter();
 
     const {data: allUsers, isLoading} = useGetAllUsersQuery({});
     const [deleteUser] = useDeleteUserMutation();
@@ -130,6 +134,13 @@ const ManageUsers = () => {
     const handleCloseModal = () => {
         setDeleteModalOpen(false);
     };
+
+    useEffect(() => {
+        if (user.role === 'user') {
+            router.push('/')
+        }
+    }, [router, user]);
+
     return (
         <Box sx={{display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
             <Typography variant={'h4'}>Manage Users</Typography>

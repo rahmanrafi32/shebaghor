@@ -1,4 +1,4 @@
-import {ReactElement, useState} from "react";
+import {ReactElement, useEffect, useState} from "react";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -9,6 +9,8 @@ import Grid from "@mui/material/Grid";
 import DeleteServiceModal from "@/components/DeleteServiceModal";
 import {useDeleteServiceMutation, useGetAllServicesQuery} from "@/redux/api/serviceApi";
 import CustomSnackBar from "@/components/CustomSnackbar";
+import {getUserInfo} from "@/utils/getUserInfo";
+import {useRouter} from "next/navigation";
 
 type IService = {
     id: string,
@@ -24,6 +26,9 @@ const ManageServices = () => {
     const [open, setOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
     const [severity, setSeverity] = useState('success');
+    const user = getUserInfo() as any;
+    const router = useRouter();
+
     const {data, isLoading, isError} = useGetAllServicesQuery({});
     const [deleteServiceApi] = useDeleteServiceMutation();
     const handleDelete = (service: IService) => {
@@ -48,6 +53,13 @@ const ManageServices = () => {
         setDeleteService(null);
         setIsDeleteModalOpen(false);
     };
+
+    useEffect(() => {
+        if (user.role === 'user') {
+            router.push('/')
+        }
+    }, [router, user]);
+
     return (
         <Box>
             <Typography variant={'h4'}>Manage Services</Typography>

@@ -64,11 +64,6 @@ export const superAdmin: DrawerItem[] = [
 
 export const userMenu:DrawerItem[] = [
     {
-        name: 'Manage Profile',
-        icon: <AccountCircleIcon/>,
-        link: '/manage-content'
-    },
-    {
         name: 'Bookings',
         icon: <LocalMallIcon/>,
         link: '/manage-content'

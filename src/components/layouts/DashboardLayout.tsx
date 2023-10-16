@@ -71,6 +71,9 @@ const DashboardLayout = ({children}: IProps) => {
         handleMobileMenuClose();
         handleCloseUserMenu();
         localStorage.removeItem('token');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user_role');
+        localStorage.removeItem('user_email');
     }
 
     useEffect(() => {
@@ -135,20 +138,11 @@ const DashboardLayout = ({children}: IProps) => {
                     <Typography textAlign="center">All Services</Typography>
                 </Link>
             </MenuItem>
-            {
-                role === 'admin' || role === 'super_admin' ? (
-                    <MenuItem>
-                        <Link href={'/dashboard'} style={{color: '#000', textDecoration: 'none'}}>
-                            <Typography textAlign="center">Dashboard</Typography>
-                        </Link>
-                    </MenuItem>) : (
-                    <MenuItem>
-                        <Link href={'/service-orders'} style={{color: '#000', textDecoration: 'none'}}>
-                            <Typography textAlign="center">Service Orders</Typography>
-                        </Link>
-                    </MenuItem>
-                )
-            }
+            <MenuItem>
+                <Link href={role === 'user' ? '/dashboard/user/bookings' : '/dashboard/manage-service'} style={{color: '#000', textDecoration: 'none'}}>
+                    <Typography textAlign="center">Dashboard</Typography>
+                </Link>
+            </MenuItem>
             <MenuItem onClick={() => logout()}>
                 <Typography textAlign="center">Logout</Typography>
             </MenuItem>
@@ -211,20 +205,11 @@ const DashboardLayout = ({children}: IProps) => {
                                         <Typography textAlign="center">Profile</Typography>
                                     </Link>
                                 </MenuItem>
-                                {
-                                    role === 'admin' || role === 'super_admin' ? (
-                                        <MenuItem>
-                                            <Link href={'/dashboard'} style={{color: '#000', textDecoration: 'none'}}>
-                                                <Typography textAlign="center">Dashboard</Typography>
-                                            </Link>
-                                        </MenuItem>) : (
-                                        <MenuItem>
-                                            <Link href={'/service-orders'} style={{color: '#000', textDecoration: 'none'}}>
-                                                <Typography textAlign="center">Service Orders</Typography>
-                                            </Link>
-                                        </MenuItem>
-                                    )
-                                }
+                                <MenuItem>
+                                    <Link href={role === 'user' ? '/dashboard/user/bookings' : '/dashboard/manage-service'} style={{color: '#000', textDecoration: 'none'}}>
+                                        <Typography textAlign="center">Dashboard</Typography>
+                                    </Link>
+                                </MenuItem>
                                 <MenuItem onClick={() => logout()}>
                                     <Typography textAlign="center">
                                         Logout

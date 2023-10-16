@@ -11,7 +11,6 @@ import PersonIcon from '@mui/icons-material/Person';
 import TextField from "@mui/material/TextField";
 import {useAddReviewMutation, useGetServiceByIdQuery} from "@/redux/api/serviceApi";
 import {useRouter} from "next/router";
-import CircularProgress from '@mui/material/CircularProgress';
 import {getUserInfo} from "@/utils/getUserInfo";
 import Link from "next/link";
 

@@ -17,6 +17,7 @@ import {styled} from "@mui/material/styles";
 import axios from "axios";
 import {getPublicIdFromUrl, handleDeleteImage} from "@/utils/deleteImage";
 import CustomSnackBar from "@/components/CustomSnackbar";
+import {getUserInfo} from "@/utils/getUserInfo";
 
 type editData = {
     id: string;
@@ -59,6 +60,7 @@ const EditService = () => {
     const [snackbarMessage, setSnackbarMessage] = useState("");
     const [severity, setSeverity] = useState('success');
     const {name, price, category, whatsInclude, whatsExclude, image} = editData;
+    const user = getUserInfo() as any;
 
     useEffect(() => {
         if (service && service.data) {
@@ -139,6 +141,12 @@ const EditService = () => {
             }, 2100);
         }
     }
+
+    useEffect(() => {
+        if (user.role === 'user') {
+            router.push('/')
+        }
+    }, [router, user]);
 
     return (
         <Container>

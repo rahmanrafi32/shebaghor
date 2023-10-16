@@ -1,4 +1,4 @@
-import {ReactElement, SyntheticEvent, useState} from "react";
+import {ReactElement, SyntheticEvent, useEffect, useState} from "react";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -13,6 +13,8 @@ import CircularProgress from "@mui/material/CircularProgress";
 import DeleteServiceModal from "@/components/DeleteServiceModal";
 import CustomSnackBar from "@/components/CustomSnackbar";
 import EditUserModal from "@/components/EditModal";
+import {getUserInfo} from "@/utils/getUserInfo";
+import {useRouter} from "next/navigation";
 
 type User = {
     firstName: string;
@@ -31,6 +33,8 @@ const ManageAdmin = () => {
     const [severity, setSeverity] = useState('success');
     const [isEditModalOpen, setEditModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
+    const user = getUserInfo() as any;
+    const router = useRouter()
 
     const {data: allAdmins, isLoading} = useGetAllAdminsQuery({});
     const [deleteAdmin] = useDeleteAdminMutation();
@@ -129,6 +133,12 @@ const ManageAdmin = () => {
     const handleCloseModal = () => {
         setDeleteModalOpen(false);
     };
+
+    useEffect(() => {
+        if (user.role === 'user') {
+            router.push('/')
+        }
+    }, [router, user]);
 
     return (
         <Box sx={{display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>

@@ -16,6 +16,7 @@ import isLoggedIn from "@/utils/isLoggedIn";
 import PersonIcon from '@mui/icons-material/Person';
 import Link from 'next/link'
 import {getUserInfo} from "@/utils/getUserInfo";
+import {useRouter} from "next/navigation";
 
 const Search = styled('div')(({theme}) => ({
     position: 'relative',
@@ -61,7 +62,10 @@ export default function Appbar() {
     const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
     const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
     const [showSearchBar, setShowSearchBar] = useState(false);
+    const userLoggedIn = isLoggedIn();
+    const router = useRouter();
     const {role} = getUserInfo() as any;
+
     useEffect(() => {
         const handleScroll = () => {
             if (window.scrollY > 0) {
@@ -98,7 +102,14 @@ export default function Appbar() {
         handleCloseUserMenu();
         handleMobileMenuClose();
         localStorage.removeItem('token');
+        localStorage.removeItem('user_role');
+        localStorage.removeItem('user_email');
     }
+
+    useEffect(() => {
+        !userLoggedIn ? router.push('/login') : null
+    }, [router, userLoggedIn]);
+
 
     const mobileMenuId = 'primary-search-account-menu-mobile';
     const renderMobileMenu = (
@@ -131,21 +142,12 @@ export default function Appbar() {
                     <Typography textAlign="center">All Services</Typography>
                 </Link>
             </MenuItem>
-            {
-                role === 'admin' || role === 'super_admin' ? (
-                    <MenuItem>
-                        <Link href={'/dashboard'} style={{color: '#000', textDecoration: 'none'}}>
-                            <Typography textAlign="center">Dashboard</Typography>
-                        </Link>
-                    </MenuItem>) : (
-                    <MenuItem>
-                        <Link href={'/service-orders'} style={{color: '#000', textDecoration: 'none'}}>
-                            <Typography textAlign="center">Service Orders</Typography>
-                        </Link>
-                    </MenuItem>
-                )
-            }
-
+            <MenuItem>
+                <Link href={role === 'user' ? '/dashboard/user/bookings' : '/dashboard/manage-service'}
+                      style={{color: '#000', textDecoration: 'none'}}>
+                    <Typography textAlign="center">Dashboard</Typography>
+                </Link>
+            </MenuItem>)
             {
                 !isLoggedIn() ? (<MenuItem>
                     <Link href={'/login'} style={{color: '#000', textDecoration: 'none'}}>
@@ -227,19 +229,12 @@ export default function Appbar() {
                                             <Typography textAlign="center">Profile</Typography>
                                         </Link>
                                     </MenuItem>
-                                    {
-                                        role === 'admin' || role === 'super_admin' ? (<MenuItem>
-                                            <Link href={'/dashboard'}
-                                                  style={{color: '#000', textDecoration: 'none'}}>
-                                                <Typography textAlign="center">Dashboard</Typography>
-                                            </Link>
-                                        </MenuItem>) : (<MenuItem>
-                                            <Link href={'/service-orders'}
-                                                  style={{color: '#000', textDecoration: 'none'}}>
-                                                <Typography textAlign="center">Service Orders</Typography>
-                                            </Link>
-                                        </MenuItem>)
-                                    }
+                                    <MenuItem>
+                                        <Link href={role === 'user' ? '/dashboard/user/bookings' : '/dashboard/manage-service'}
+                                              style={{color: '#000', textDecoration: 'none'}}>
+                                            <Typography textAlign="center">Dashboard</Typography>
+                                        </Link>
+                                    </MenuItem>
                                     <MenuItem onClick={() => logout()}>
                                         <Typography textAlign="center">
                                             Logout

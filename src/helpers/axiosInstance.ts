@@ -13,18 +13,20 @@ instance.interceptors.request.use(function (config) {
     return Promise.reject(error);
 });
 
-/*// @ts-ignore
+// @ts-ignore
 instance.interceptors.response.use(function (response) {
     return {
         data: response?.data,
     };
-}, function (error) {
-    return {
-        statusCode: error?.response?.data?.statusCode || 500,
-        messages: error?.response?.data?.messages || "Something went wrong",
-        errorMessages: error?.response?.data?.messages
+}, (error) => {
+    if (error.response) {
+        return Promise.reject(error.response.data)
+    } else if (error.request) {
+        return Promise.reject({message: 'Network Error'});
+    } else {
+        return Promise.reject(error);
     }
-});*/
+});
 
 instance.defaults.headers.post['Content-Type'] = "application/json"
 instance.defaults.headers["Accept"] = "application/json"

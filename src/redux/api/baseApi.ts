@@ -5,7 +5,7 @@ const baseUrl = process.env.NEXT_PUBLIC_BASE_URL as string
 export const baseApi = createApi({
     reducerPath: 'api',
     baseQuery: axiosBaseQuery({baseUrl}),
-    tagTypes: ['service', 'admin','user'],
+    tagTypes: ['service', 'admin','user', 'booking'],
     endpoints: () => ({}),
 })
 

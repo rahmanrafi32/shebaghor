@@ -1,4 +1,4 @@
-import {ReactElement, useState} from "react";
+import {ReactElement, useEffect, useState} from "react";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
@@ -7,9 +7,10 @@ import Button from "@mui/material/Button";
 import {z} from 'zod';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useForm} from 'react-hook-form';
-import {useRouter} from "next/router";
+import {useRouter} from "next/navigation";
 import {useCreateAdminMutation} from "@/redux/api/superAdminApi";
 import CustomSnackBar from "@/components/CustomSnackbar";
+import {getUserInfo} from "@/utils/getUserInfo";
 
 interface AdminData {
     email: string;
@@ -34,6 +35,7 @@ const AddAdmin = () => {
     const [open, setOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
     const [severity, setSeverity] = useState('success');
+    const user = getUserInfo() as any;
 
     const [createAdmin] = useCreateAdminMutation();
 
@@ -41,9 +43,9 @@ const AddAdmin = () => {
         defaultValues: {
             email: '',
             password: '',
-            firstName:'',
-            lastName:'',
-            role:'admin',
+            firstName: '',
+            lastName: '',
+            role: 'admin',
             contactNo: ''
         },
         resolver: zodResolver(schema),
@@ -62,6 +64,12 @@ const AddAdmin = () => {
             }, 2100);
         }
     };
+
+    useEffect(() => {
+        if (user.role === 'user') {
+            router.push('/')
+        }
+    }, [router, user]);
 
 
     return (

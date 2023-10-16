@@ -1,4 +1,4 @@
-import React, {ChangeEvent, ReactElement, useState} from "react";
+import React, {ChangeEvent, ReactElement, useEffect, useState} from "react";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
@@ -11,8 +11,9 @@ import {styled} from "@mui/material/styles";
 import axios from "axios";
 import Image from "next/image";
 import {useAddServiceMutation} from "@/redux/api/serviceApi";
-import {useRouter} from "next/router";
+import {useRouter} from "next/navigation";
 import CustomSnackBar from "@/components/CustomSnackbar";
+import {getUserInfo} from "@/utils/getUserInfo";
 
 interface ServiceData {
     name: string;
@@ -117,10 +118,20 @@ const AddService = () => {
                     router.push('/dashboard/manage-service');
                 }, 2100);
             }
-        } catch (error) {
-            console.error('Error creating service:', error);
+        } catch (error: any) {
+            setOpen(true);
+            setSeverity('error');
+            setSnackbarMessage(error.data)
         }
     };
+
+    const user = getUserInfo() as any;
+
+    useEffect(() => {
+        if (user.role === 'user') {
+            router.push('/')
+        }
+    }, [router, user]);
     return (
         <Container>
             <Typography variant="h4" component="h1" gutterBottom>

@@ -1,4 +1,4 @@
-import {ReactElement, useState} from "react";
+import {ReactElement, useEffect, useState} from "react";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
@@ -10,6 +10,7 @@ import {useForm} from 'react-hook-form';
 import {useRouter} from "next/router";
 import {useCreateAdminMutation, useCreateUserMutation} from "@/redux/api/superAdminApi";
 import CustomSnackBar from "@/components/CustomSnackbar";
+import {getUserInfo} from "@/utils/getUserInfo";
 
 interface UserData {
     email: string;
@@ -32,6 +33,7 @@ const AddUser = () => {
     const [open, setOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
     const [severity, setSeverity] = useState('success');
+    const user = getUserInfo() as any;
 
     const [createUser] = useCreateUserMutation();
 
@@ -57,6 +59,12 @@ const AddUser = () => {
             }, 2100);
         }
     };
+
+    useEffect(() => {
+        if (user.role === 'user') {
+            router.push('/')
+        }
+    }, [router, user]);
     return (
         <Container maxWidth="sm">
             <Typography variant="h4" gutterBottom>
