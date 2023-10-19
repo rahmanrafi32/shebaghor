@@ -5,7 +5,7 @@ import Link from "next/link";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
-import MUIDataTable from "mui-datatables";
+import MUIDataTable, {MUIDataTableOptions} from "mui-datatables";
 import DeleteServiceModal from "@/components/DeleteServiceModal";
 import EditUserModal from "@/components/EditModal";
 import CustomSnackBar from "@/components/CustomSnackbar";
@@ -15,6 +15,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import {useDeleteUserMutation, useEditUserMutation, useGetAllUsersQuery} from "@/redux/api/superAdminApi";
 import {getUserInfo} from "@/utils/getUserInfo";
 import {useRouter} from "next/navigation";
+import {AlertColor} from "@mui/material";
 
 type User = {
     firstName: string;
@@ -31,7 +32,7 @@ const ManageUsers = () => {
     const [modalMessage, setModalMessage] = useState<string>('')
     const [open, setOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
-    const [severity, setSeverity] = useState('success');
+    const [severity, setSeverity] = useState<AlertColor>('success');
     const [isEditModalOpen, setEditModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const user = getUserInfo() as any;
@@ -80,7 +81,7 @@ const ManageUsers = () => {
             }
         }];
 
-    const options = {
+    const options: MUIDataTableOptions = {
         responsive: 'vertical',
         print: false,
         selectableRows: "none",
@@ -163,12 +164,12 @@ const ManageUsers = () => {
                 onConfirmDelete={handleConfirmDelete}
                 modalMessage={modalMessage}
             />
-            <EditUserModal
+            { selectedUser && (<EditUserModal
                 open={isEditModalOpen}
                 onClose={handleCloseEditModal}
                 user={selectedUser}
                 onEdit={handleConfirmEdit}
-            />
+            />)}
             <CustomSnackBar open={open} setOpen={setOpen} message={snackbarMessage} severity={severity}/>
         </Box>
     );

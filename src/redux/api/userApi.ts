@@ -12,8 +12,16 @@ export const userApi = baseApi.injectEndpoints({
             }),
             providesTags: ["user"]
         }),
+        updateUserInfo: build.mutation({
+            query: (payload) => ({
+                url: `${URL}/`,
+                method: "PATCH",
+                data: payload
+            }),
+            invalidatesTags: ["user"]
+        }),
     }),
 
 })
 
-export const {useUserInfoQuery} = userApi
+export const {useUserInfoQuery, useLazyUserInfoQuery,useUpdateUserInfoMutation} = userApi

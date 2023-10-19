@@ -1,4 +1,4 @@
-import {ReactElement, useEffect, useState} from "react";
+import {ReactElement, SyntheticEvent, useEffect, useState} from "react";
 import RootLayout from "@/components/layouts/RootLayout";
 import Box from "@mui/material/Box";
 import Image from "next/image";
@@ -13,13 +13,20 @@ import {useAddReviewMutation, useGetServiceByIdQuery} from "@/redux/api/serviceA
 import {useRouter} from "next/router";
 import {getUserInfo} from "@/utils/getUserInfo";
 import Link from "next/link";
+import {Rating} from "@mui/material";
 
 const Service = () => {
     const {query} = useRouter();
     const id = query.id as string;
     const {data, isLoading} = useGetServiceByIdQuery(id);
     const [visibleReviews, setVisibleReviews] = useState(5);
-    const {user_email}: any = getUserInfo();
+    const [rating, setRating] = useState(0);
+
+    const handleRatingChange = (_: SyntheticEvent, newRating: any) => {
+        setRating(newRating);
+    };
+
+    const {user} = getUserInfo() as any;
 
     const [reviews, setReviews] = useState({
         reviewer: '',
@@ -31,10 +38,10 @@ const Service = () => {
     useEffect(() => {
         setReviews((prevReviews) => ({
             ...prevReviews,
-            reviewer: user_email,
+            reviewer: user,
             id,
         }));
-    }, [id, user_email]);
+    }, [id, user]);
 
     const onReviewSubmit = async () => {
         const res = await addReview(reviews).unwrap();
@@ -105,6 +112,16 @@ const Service = () => {
                 <Box sx={{display: 'flex', alignItems: 'flex-end'}}>
                     <Typography sx={{fontWeight: 'bold'}} variant={'h4'}>{data?.data?.ratings}.0</Typography>
                     <Typography sx={{ml: 1}}>Out of 5</Typography>
+                </Box>
+                <Box sx={{mt: 2}}>
+                    <Typography component="legend">Rate this Service:</Typography>
+                    <Box borderColor="transparent">
+                        <Rating
+                            name="product-rating"
+                            value={rating}
+                            onChange={handleRatingChange}
+                        />
+                    </Box>
                 </Box>
             </Container>
             <Box sx={{display: 'flex', justifyContent: 'center', mt: 5, mb: 5}}>

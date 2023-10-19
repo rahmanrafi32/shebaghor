@@ -5,18 +5,19 @@ import Box from "@mui/material/Box";
 import {useDeleteUserBookingMutation, useGetAllBookingsQuery} from "@/redux/api/bookingApi";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
-import MUIDataTable from "mui-datatables";
+import MUIDataTable, {MUIDataTableOptions} from "mui-datatables";
 import CircularProgress from "@mui/material/CircularProgress";
 import moment from "moment";
 import DeleteServiceModal from "@/components/DeleteServiceModal";
 import CustomSnackBar from "@/components/CustomSnackbar";
+import {AlertColor} from "@mui/material";
 
 const Bookings = () => {
     const [selectedBooking, setSelectedBooking] = useState('');
     const [modalMessage, setModalMessage] = useState<string>('')
     const [open, setOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
-    const [severity, setSeverity] = useState('success');
+    const [severity, setSeverity] = useState<AlertColor>('success');
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
 
     const {data: bookings, isLoading} = useGetAllBookingsQuery({});
@@ -75,7 +76,7 @@ const Bookings = () => {
     };
 
 
-    const options = {
+    const options: MUIDataTableOptions = {
         responsive: 'vertical',
         print: false,
         selectableRows: "none",

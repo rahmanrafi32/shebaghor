@@ -4,7 +4,7 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
-import {Button, Container} from "@mui/material";
+import {AlertColor, Button, Container, FormControl, InputLabel, Select, SelectChangeEvent} from "@mui/material";
 import {AddCircle, RemoveCircle} from "@mui/icons-material";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import {styled} from "@mui/material/styles";
@@ -14,6 +14,7 @@ import {useAddServiceMutation} from "@/redux/api/serviceApi";
 import {useRouter} from "next/navigation";
 import CustomSnackBar from "@/components/CustomSnackbar";
 import {getUserInfo} from "@/utils/getUserInfo";
+import MenuItem from "@mui/material/MenuItem";
 
 interface ServiceData {
     name: string;
@@ -23,6 +24,7 @@ interface ServiceData {
     whatsInclude: string[];
     whatsExclude: string[];
     details: string;
+    serviceType: string
 }
 
 const VisuallyHiddenInput = styled('input')({
@@ -45,12 +47,13 @@ const AddService = () => {
         category: '',
         whatsInclude: [''],
         whatsExclude: [''],
-        details: ''
+        details: '',
+        serviceType: ''
     });
     const router = useRouter();
     const [open, setOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
-    const [severity, setSeverity] = useState('success');
+    const [severity, setSeverity] = useState<AlertColor>('success');
 
     const [createService] = useAddServiceMutation();
     const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -68,7 +71,6 @@ const AddService = () => {
                     data: formData
                 };
                 const response = await axios.request(config);
-                console.log('response for image', response)
                 if (response && response.data && response.data.secure_url) {
                     const imageUrl = response.data.secure_url;
                     setServiceData((prevServiceData) => ({
@@ -83,7 +85,7 @@ const AddService = () => {
     };
 
     const handleChange = (field: keyof ServiceData, index?: number) =>
-        (event: ChangeEvent<HTMLInputElement>) => {
+        (event: any) => {
             const updatedData = {...serviceData};
             if (field === 'whatsInclude' || field === 'whatsExclude') {
                 if (index !== undefined) {
@@ -95,13 +97,13 @@ const AddService = () => {
             setServiceData(updatedData);
         };
 
-    const addField = (field: keyof ServiceData) => {
+    const addField = (field: 'whatsInclude' | 'whatsExclude') => {
         const updatedData = {...serviceData};
         updatedData[field].push('');
         setServiceData(updatedData);
     };
 
-    const removeField = (field: keyof ServiceData, index: number) => {
+    const removeField = (field: 'whatsInclude' | 'whatsExclude', index: number) => {
         const updatedData = {...serviceData};
         updatedData[field].splice(index, 1);
         setServiceData(updatedData);
@@ -147,7 +149,7 @@ const AddService = () => {
                             onChange={handleChange('name')}
                         />
                     </Grid>
-                    <Grid item xs={12} sx={{display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
+                    <Grid item xs={6} sx={{display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
                         {
                             serviceData.image ? <Image
                                 src={serviceData.image}
@@ -161,10 +163,27 @@ const AddService = () => {
                             variant="contained"
                             startIcon={<CloudUploadIcon/>}
                             sx={{width: {md: '10vw'}, mt: 2}}
+                            color={'secondary'}
                         >
                             Upload file
                             <VisuallyHiddenInput type="file" onChange={handleFileChange}/>
                         </Button>
+                    </Grid>
+                    <Grid item xs={6}>
+                        <FormControl fullWidth>
+                            <InputLabel id="demo-simple-select-label">Service Type</InputLabel>
+                            <Select
+                                labelId="demo-simple-select-label"
+                                id="demo-simple-select"
+                                value={serviceData.serviceType}
+                                label="Service Type"
+                                onChange={handleChange('serviceType')}
+                            >
+                                <MenuItem value={'regular'}>Regular</MenuItem>
+                                <MenuItem value={'featured'}>Featured</MenuItem>
+                                <MenuItem value={'upcoming'}>Upcoming</MenuItem>
+                            </Select>
+                        </FormControl>
                     </Grid>
                     <Grid item xs={6}>
                         <TextField
@@ -243,13 +262,14 @@ const AddService = () => {
                     <Grid item xs={12}>
                         <Button
                             variant="contained"
-                            color="primary"
+                            color="secondary"
                             onClick={handleSubmit}
                             disabled={
                                 serviceData.name === '' ||
                                 serviceData.image === '' ||
                                 serviceData.price === '' ||
-                                serviceData.category === ''
+                                serviceData.category === '' ||
+                                serviceData.serviceType === ''
                             }
                         >
                             Create Service

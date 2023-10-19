@@ -2,6 +2,7 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LocalMallIcon from "@mui/icons-material/LocalMall";
 import FileCopyIcon from "@mui/icons-material/FileCopy";
+import Person3Icon from '@mui/icons-material/Person3';
 import * as React from "react";
 import {JSX} from "react";
 
@@ -12,6 +13,11 @@ interface DrawerItem {
 }
 
 export const adminMenu: DrawerItem[] = [
+    {
+        name: 'Profile',
+        icon: <Person3Icon/>,
+        link: '/profile'
+    },
     {
         name: 'Manage Service',
         icon: <DashboardIcon/>,
@@ -36,13 +42,18 @@ export const adminMenu: DrawerItem[] = [
 
 export const superAdmin: DrawerItem[] = [
     {
+        name: 'Profile',
+        icon: <Person3Icon/>,
+        link: '/profile'
+    },
+    {
         name: 'Manage Service',
         icon: <DashboardIcon/>,
         link: '/manage-service'
     },
     {
         name: 'Manage User',
-        icon: <AccountCircleIcon/>,
+        icon: <Person3Icon/>,
         link: '/manage-user'
     },
     {
@@ -62,10 +73,15 @@ export const superAdmin: DrawerItem[] = [
     },
 ]
 
-export const userMenu:DrawerItem[] = [
+export const userMenu: DrawerItem[] = [
+    {
+        name: 'Profile',
+        icon: <Person3Icon/>,
+        link: '/profile'
+    },
     {
         name: 'Bookings',
         icon: <LocalMallIcon/>,
-        link: '/manage-content'
-    },
+        link: '/user/bookings'
+    }
 ]

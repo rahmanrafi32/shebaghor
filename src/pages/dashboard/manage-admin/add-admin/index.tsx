@@ -11,6 +11,7 @@ import {useRouter} from "next/navigation";
 import {useCreateAdminMutation} from "@/redux/api/superAdminApi";
 import CustomSnackBar from "@/components/CustomSnackbar";
 import {getUserInfo} from "@/utils/getUserInfo";
+import {AlertColor} from "@mui/material";
 
 interface AdminData {
     email: string;
@@ -34,7 +35,7 @@ const AddAdmin = () => {
     const router = useRouter();
     const [open, setOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
-    const [severity, setSeverity] = useState('success');
+    const [severity, setSeverity] = useState<AlertColor>('success');
     const user = getUserInfo() as any;
 
     const [createAdmin] = useCreateAdminMutation();
@@ -52,9 +53,7 @@ const AddAdmin = () => {
     });
 
     const onSubmit = async (data: AdminData) => {
-        console.log('clicked')
         const response = await createAdmin(data).unwrap();
-        console.log('response', response)
         if (response.success) {
             setOpen(true);
             setSeverity('success');

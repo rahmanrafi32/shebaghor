@@ -5,7 +5,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import {useRouter} from "next/router";
 import Container from "@mui/material/Container";
-import {Button} from "@mui/material";
+import {AlertColor, Button, FormControl, InputLabel, Select} from "@mui/material";
 import Box from "@mui/material/Box";
 import {useEditServiceMutation, useGetServiceByIdQuery} from "@/redux/api/serviceApi";
 import IconButton from "@mui/material/IconButton";
@@ -18,6 +18,7 @@ import axios from "axios";
 import {getPublicIdFromUrl, handleDeleteImage} from "@/utils/deleteImage";
 import CustomSnackBar from "@/components/CustomSnackbar";
 import {getUserInfo} from "@/utils/getUserInfo";
+import MenuItem from "@mui/material/MenuItem";
 
 type editData = {
     id: string;
@@ -27,6 +28,8 @@ type editData = {
     image: string;
     whatsInclude: string[];
     whatsExclude: string[];
+    details: string;
+    serviceType: string;
 };
 
 const VisuallyHiddenInput = styled('input')({
@@ -56,10 +59,12 @@ const EditService = () => {
         image: "",
         whatsInclude: [],
         whatsExclude: [],
+        details: '',
+        serviceType: ''
     });
     const [snackbarMessage, setSnackbarMessage] = useState("");
-    const [severity, setSeverity] = useState('success');
-    const {name, price, category, whatsInclude, whatsExclude, image} = editData;
+    const [severity, setSeverity] = useState<AlertColor>('success');
+    const {name, price, category, whatsInclude, whatsExclude, image, details, serviceType} = editData;
     const user = getUserInfo() as any;
 
     useEffect(() => {
@@ -72,9 +77,11 @@ const EditService = () => {
                 category: service.data.category,
                 whatsInclude: service.data.whatsInclude || [],
                 whatsExclude: service.data.whatsExclude || [],
+                details: service.data.details,
+                serviceType: service.data.serviceType,
             });
         }
-    }, [service]);
+    }, [id, service]);
 
     const handleFormChange = (field: keyof editData, value: string | string[]) => {
         setEditData({
@@ -83,27 +90,39 @@ const EditService = () => {
         });
     };
 
-    const addNewField = (field: keyof editData) => {
-        setEditData({
-            ...editData,
-            [field]: [...editData[field], ""],
-        });
+    // const addNewField = (field: keyof editData) => {
+    //     setEditData({
+    //         ...editData,
+    //         [field]: [...editData[field], ""],
+    //     });
+    // };
+    //
+    // const removeField = (field: string, index: number) => {
+    //     const updatedArray = [...editData[field]];
+    //     updatedArray.splice(index, 1);
+    //     setEditData({
+    //         ...editData,
+    //         [field]: updatedArray,
+    //     });
+    // };
+
+    const addNewField = (field: 'whatsInclude' | 'whatsExclude') => {
+        const updatedData = {...editData};
+        updatedData[field].push('');
+        setEditData(updatedData);
     };
 
-    const removeField = (field: string, index: number) => {
-        const updatedArray = [...editData[field]];
-        updatedArray.splice(index, 1);
-        setEditData({
-            ...editData,
-            [field]: updatedArray,
-        });
+    const removeField = (field: 'whatsInclude' | 'whatsExclude', index: number) => {
+        const updatedData = {...editData};
+        updatedData[field].splice(index, 1);
+        setEditData(updatedData);
     };
 
     const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
-        const cloudName = 'dttxxnsvp';
-        const preset = 'rpmssokb'
+        const cloudName = process.env.NEXT_PUBLIC_CLOUD_NAME as string;
+        const preset = process.env.NEXT_PUBLIC_UPLOAD_PRESET as string;
         const publicId = getPublicIdFromUrl(editData.image);
-        const {data} = await handleDeleteImage(publicId);
+        const {data}: any = await handleDeleteImage(publicId);
 
         const file = event.target.files?.[0];
         if (file && data.result === 'ok') {
@@ -155,6 +174,7 @@ const EditService = () => {
                 <Grid item xs={6}>
                     <TextField
                         fullWidth
+                        label="Service Name"
                         variant="outlined"
                         value={name}
                         onChange={(e) => handleFormChange("name", e.target.value)}
@@ -163,12 +183,13 @@ const EditService = () => {
                 <Grid item xs={6}>
                     <TextField
                         fullWidth
+                        label="Price"
                         variant="outlined"
                         value={price}
                         onChange={(e) => handleFormChange("price", e.target.value)}
                     />
                 </Grid>
-                <Grid item xs={12} sx={{display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
+                <Grid item xs={6} sx={{display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
                     {
                         image ? <Image
                             src={image}
@@ -188,11 +209,39 @@ const EditService = () => {
                         <VisuallyHiddenInput type="file" onChange={handleFileChange}/>
                     </Button>
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
+                    <TextField
+                        fullWidth
+                        label="Service Details"
+                        multiline
+                        maxRows={4}
+                        variant="outlined"
+                        value={details}
+                        onChange={(e) => handleFormChange("details", e.target.value)}
+                    />
+                </Grid>
+                <Grid item xs={6}>
+                    <FormControl fullWidth>
+                        <InputLabel id="demo-simple-select-label">Service Type</InputLabel>
+                        <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            value={serviceType}
+                            label="Service Type"
+                            onChange={(e) => handleFormChange('serviceType', e.target.value)}
+                        >
+                            <MenuItem value={'regular'}>Regular</MenuItem>
+                            <MenuItem value={'featured'}>Featured</MenuItem>
+                            <MenuItem value={'upcoming'}>Upcoming</MenuItem>
+                        </Select>
+                    </FormControl>
+                </Grid>
+                <Grid item xs={6}>
                     <TextField
                         fullWidth
                         variant="outlined"
                         value={category}
+                        label="Category"
                         onChange={(e) => handleFormChange("category", e.target.value)}
                     />
                 </Grid>

@@ -56,7 +56,7 @@ export const superAdminApi = baseApi.injectEndpoints({
                 method: "PATCH",
                 data
             }),
-            invalidatesTags: ["user"],
+            invalidatesTags: ["user", 'admin'],
         }),
         createUser: build.mutation({
             query: (loginData) => ({

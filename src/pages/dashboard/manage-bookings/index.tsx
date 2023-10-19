@@ -5,7 +5,7 @@ import {useRouter} from "next/navigation";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
-import MUIDataTable from "mui-datatables";
+import MUIDataTable, {MUIDataTableOptions} from "mui-datatables";
 import DeleteServiceModal from "@/components/DeleteServiceModal";
 import CustomSnackBar from "@/components/CustomSnackbar";
 import {
@@ -16,7 +16,7 @@ import {
 import moment from "moment/moment";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
-import {FormControl, InputLabel, Select, SelectChangeEvent} from "@mui/material";
+import {AlertColor, FormControl, InputLabel, Select, SelectChangeEvent} from "@mui/material";
 import MenuItem from "@mui/material/MenuItem";
 
 const ManageBookings = () => {
@@ -24,11 +24,12 @@ const ManageBookings = () => {
     const user = getUserInfo() as any;
     const [open, setOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
-    const [severity, setSeverity] = useState('success');
+    const [severity, setSeverity] = useState<AlertColor>('success');
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [selectedBooking, setSelectedBooking] = useState('');
     const [modalMessage, setModalMessage] = useState<string>('')
-    const [status, setStatus] = useState('');
+
+    const [status, setStatus] = useState<{[id: string]: string }>({});
 
     const {data: allBookings, isLoading} = useGetAllBookingsForAdminQuery({});
     const [changeStatus] = useChangeBookingStatusMutation();
@@ -43,7 +44,7 @@ const ManageBookings = () => {
         Road No: ${item?.user?.roadNo},
         Floor: ${item?.user?.floor},
         Area: ${item?.user?.area}`,
-        moment.unix(item.bookingTime).format("LLL"),
+        moment(item.bookingTime).format("LLL"),
         item?.bookingStatus,
         item._id
     ]);
@@ -53,7 +54,10 @@ const ManageBookings = () => {
             id,
             status: event.target.value
         }
-        setStatus(event.target.value)
+        setStatus((prevStatus) => ({
+            ...prevStatus,
+            [id]: event.target.value
+        }));
         try {
             const response = await changeStatus(body).unwrap();
             if (response.success) {
@@ -80,7 +84,7 @@ const ManageBookings = () => {
                             <Select
                                 labelId="demo-simple-select-standard-label"
                                 id="demo-simple-select-standard"
-                                value={status}
+                                value={status[tableData.rowData[7]] || ''}
                                 onChange={(event: SelectChangeEvent) => handleChange(event, tableData.rowData[7])}
                             >
                                 <MenuItem value={'pending'}>Pending</MenuItem>
@@ -109,7 +113,7 @@ const ManageBookings = () => {
         }
     ];
 
-    const options = {
+    const options: MUIDataTableOptions = {
         responsive: 'vertical',
         print: false,
         selectableRows: "none",
@@ -130,7 +134,6 @@ const ManageBookings = () => {
     const handleConfirmDelete = async () => {
         try {
             if (selectedBooking) {
-                console.log('selected booking', selectedBooking)
                 const response = await deleteBooking(selectedBooking).unwrap();
                 if (response.success) {
                     setOpen(true);

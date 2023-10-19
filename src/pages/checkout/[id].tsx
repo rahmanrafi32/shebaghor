@@ -2,9 +2,9 @@ import {ReactElement, useEffect, useState} from "react";
 import RootLayout from "@/components/layouts/RootLayout";
 import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
-import {Paper} from "@mui/material";
+import {AlertColor, Paper} from "@mui/material";
 import Typography from "@mui/material/Typography";
-import moment from "moment";
+import moment, {Moment} from "moment";
 import {DateTimePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterMoment} from '@mui/x-date-pickers/AdapterMoment'
 import {renderTimeViewClock} from '@mui/x-date-pickers/timeViewRenderers';
@@ -21,13 +21,14 @@ import isLoggedIn from "@/utils/isLoggedIn";
 import {useGetServiceByIdQuery} from "@/redux/api/serviceApi";
 import {useCreateBookingMutation} from "@/redux/api/bookingApi";
 import CustomSnackBar from "@/components/CustomSnackbar";
+import Link from "next/link";
 
 const Checkout = () => {
     const [deliveryCharge, setDeiveryCharge] = useState(0);
     const [discount, setDiscount] = useState(0);
     const [open, setOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
-    const [severity, setSeverity] = useState('success');
+    const [severity, setSeverity] = useState<AlertColor>('success');
     const router = useRouter();
     const userLoggedIn = isLoggedIn();
     const id = router.query.id as string;
@@ -37,9 +38,9 @@ const Checkout = () => {
         !userLoggedIn ? router.push('/login') : null
     }, [router, userLoggedIn]);
 
-    const [bookingTime, setBookingTime] = useState(moment().unix())
+    const [bookingTime, setBookingTime] = useState(moment())
     const [bookingData, setBookingData] = useState({
-        bookingTime: moment().unix(),
+        bookingTime: moment().format('LLL'),
         user: '',
         service: '',
         totalAmount: 0
@@ -50,7 +51,7 @@ const Checkout = () => {
 
     useEffect(() => {
         const updatedBookingData = {
-            bookingTime: bookingTime,
+            bookingTime: moment(bookingTime).format('LLL'),
             user: userInfo?.data?.id,
             service: serviceInfo?.data?.id,
             totalAmount
@@ -60,15 +61,29 @@ const Checkout = () => {
 
     const [confirmBooking] = useCreateBookingMutation();
     const handleBooking = async () => {
-        console.log('booking', bookingData)
-        const response = await confirmBooking(bookingData).unwrap();
-        if (response.success) {
+        try {
+            if (userInfo?.data?.houseNo === undefined ||
+                userInfo?.data?.roadNo === undefined ||
+                userInfo?.data?.floor === undefined ||
+                userInfo?.data?.area === undefined) {
+                setOpen(true);
+                setSeverity('error');
+                setSnackbarMessage('Please add your address.')
+            } else {
+                const response = await confirmBooking(bookingData).unwrap();
+                if (response && response.success) {
+                    setOpen(true);
+                    setSeverity('success');
+                    setSnackbarMessage(response.message)
+                    setTimeout(() => {
+                        router.push('/');
+                    }, 2100);
+                }
+            }
+        } catch (err: any) {
             setOpen(true);
-            setSeverity('success');
-            setSnackbarMessage(response.message)
-            setTimeout(() => {
-                router.push('/');
-            }, 2100);
+            setSeverity('error');
+            setSnackbarMessage(err.data)
         }
     }
 
@@ -84,14 +99,14 @@ const Checkout = () => {
                                 within this time</Typography>
                             <LocalizationProvider dateAdapter={AdapterMoment}>
                                 <DateTimePicker
-                                    defaultValue={moment.unix(bookingTime)}
+                                    defaultValue={moment(bookingTime)}
                                     viewRenderers={{
                                         hours: renderTimeViewClock,
                                         minutes: renderTimeViewClock,
                                         seconds: renderTimeViewClock,
                                     }}
                                     disablePast
-                                    onChange={(value) => setBookingTime(moment(value).unix())}
+                                    onChange={(value) => setBookingTime(moment(value))}
                                 />
                             </LocalizationProvider>
                         </Box>
@@ -128,10 +143,25 @@ const Checkout = () => {
                                 flexDirection: 'column',
                                 justifyContent: 'center'
                             }}>
-                                <Typography>House No : {userInfo?.data?.houseNo}</Typography>
-                                <Typography>Road No : {userInfo?.data?.roadNo}</Typography>
-                                <Typography>Floor : {userInfo?.data?.floor}</Typography>
-                                <Typography>Area : {userInfo?.data?.area}</Typography>
+                                <Typography color={userInfo?.data?.houseNo === undefined ? 'error' : ''}>House No
+                                    : {userInfo?.data?.houseNo}</Typography>
+                                <Typography color={userInfo?.data?.roadNo === undefined ? 'error' : ''}>Road No
+                                    : {userInfo?.data?.roadNo}</Typography>
+                                <Typography color={userInfo?.data?.floor === undefined ? 'error' : ''}>Floor
+                                    : {userInfo?.data?.floor}</Typography>
+                                <Typography color={userInfo?.data?.area === undefined ? 'error' : ''}>Area
+                                    : {userInfo?.data?.area}</Typography>
+                                {
+                                    userInfo?.data?.houseNo === undefined ||
+                                    userInfo?.data?.roadNo === undefined ||
+                                    userInfo?.data?.floor === undefined ||
+                                    userInfo?.data?.area === undefined ?
+                                        <Link href={'/dashboard/profile/edit-profile'}>
+                                            <Button color={'error'} sx={{mt: 1}}>
+                                                Add Address
+                                            </Button>
+                                        </Link> : null
+                                }
                             </Box>
                         </Box>
                     </Paper>
@@ -201,7 +231,7 @@ const Checkout = () => {
                             </Button>
                         </Box>
                         <Typography variant={'subtitle1'} sx={{mt: 1, color: '#9a9a9a'}}>
-                            By placing order, I agree to the terms & conditions
+                            By placing order, I agree to the <Link href={'/terms-and-condition'}>terms & conditions</Link>
                         </Typography>
                     </Paper>
                 </Grid>

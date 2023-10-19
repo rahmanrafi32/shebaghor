@@ -1,8 +1,16 @@
 import ServiceCard from "@/components/ServiceCard";
+import {Service} from "@/interfaces/common";
 
-const FeaturedService = () => {
+type FeaturedServicesProps = {
+    featuredServices: Service[];
+};
+
+const FeaturedService = ({featuredServices}: FeaturedServicesProps) => {
     return (
-        <ServiceCard serviceType={'Featured Services'}/>
+        <ServiceCard
+            serviceType={'Featured Services'}
+            serviceData={featuredServices}
+        />
     );
 };
 

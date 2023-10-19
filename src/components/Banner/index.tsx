@@ -1,4 +1,3 @@
-'use client'
 import Image from "next/image";
 import BannerImage from '../../assets/banner_image.jpg'
 import Box from "@mui/material/Box";
@@ -6,7 +5,7 @@ import Typography from "@mui/material/Typography";
 
 const Banner = () => {
     return (
-        <Box sx={{position: 'relative', width: '100%', height: '550px'}}>
+        <Box sx={{position: 'relative', width: '100%', height: '450px'}}>
             <Image
                 src={BannerImage}
                 alt="Banner Image"

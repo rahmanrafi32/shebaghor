@@ -8,9 +8,10 @@ import {z} from 'zod';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useForm} from 'react-hook-form';
 import {useRouter} from "next/router";
-import {useCreateAdminMutation, useCreateUserMutation} from "@/redux/api/superAdminApi";
+import {useCreateUserMutation} from "@/redux/api/superAdminApi";
 import CustomSnackBar from "@/components/CustomSnackbar";
 import {getUserInfo} from "@/utils/getUserInfo";
+import {AlertColor} from "@mui/material";
 
 interface UserData {
     email: string;
@@ -32,7 +33,7 @@ const AddUser = () => {
     const router = useRouter();
     const [open, setOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
-    const [severity, setSeverity] = useState('success');
+    const [severity, setSeverity] = useState<AlertColor>('success');
     const user = getUserInfo() as any;
 
     const [createUser] = useCreateUserMutation();

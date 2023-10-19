@@ -1,87 +1,38 @@
 import * as React from 'react';
-import {styled, alpha} from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import InputBase from '@mui/material/InputBase';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
-import SearchIcon from '@mui/icons-material/Search';
 import {Avatar, Button} from "@mui/material";
 import {useEffect, useState} from "react";
 import isLoggedIn from "@/utils/isLoggedIn";
 import PersonIcon from '@mui/icons-material/Person';
 import Link from 'next/link'
 import {getUserInfo} from "@/utils/getUserInfo";
-import {useRouter} from "next/navigation";
-
-const Search = styled('div')(({theme}) => ({
-    position: 'relative',
-    borderRadius: theme.shape.borderRadius,
-    backgroundColor: alpha(theme.palette.common.white, 0.15),
-    '&:hover': {
-        backgroundColor: alpha(theme.palette.common.white, 0.25),
-    },
-    marginRight: theme.spacing(2),
-    marginLeft: 0,
-    width: '60%',
-    [theme.breakpoints.up('sm')]: {
-        marginLeft: theme.spacing(3),
-        width: '40vw',
-    },
-}));
-
-const SearchIconWrapper = styled('div')(({theme}) => ({
-    padding: theme.spacing(0, 2),
-    height: '100%',
-    position: 'absolute',
-    pointerEvents: 'none',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-}));
-
-const StyledInputBase = styled(InputBase)(({theme}) => ({
-    color: 'inherit',
-    '& .MuiInputBase-input': {
-        padding: theme.spacing(1, 1, 1, 0),
-        paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-        transition: theme.transitions.create('width'),
-        width: '100%',
-        [theme.breakpoints.up('md')]: {
-            width: '35vw',
-        },
-    },
-}));
+import {useRouter, usePathname} from "next/navigation";
+import CustomSearch from "@/components/CustomSearch";
+import {useUserInfoQuery} from "@/redux/api/userApi";
+import Image from "next/image";
 
 export default function Appbar() {
     const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState<null | HTMLElement>(null);
     const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
     const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
-    const [showSearchBar, setShowSearchBar] = useState(false);
+    const [userImage, setUserImage] = useState('')
     const userLoggedIn = isLoggedIn();
     const router = useRouter();
+    const pathName = usePathname();
     const {role} = getUserInfo() as any;
 
+    const {data: userInfo} = useUserInfoQuery({});
+
     useEffect(() => {
-        const handleScroll = () => {
-            if (window.scrollY > 0) {
-                setShowSearchBar(true);
-            } else {
-                setShowSearchBar(false);
-            }
-        };
-
-        window.addEventListener('scroll', handleScroll);
-        return () => {
-            window.removeEventListener('scroll', handleScroll);
-        };
-    }, []);
-
-
+        setUserImage(userInfo?.data?.image)
+    }, [userInfo]);
     const handleMobileMenuClose = () => {
         setMobileMoreAnchorEl(null);
     };
@@ -133,7 +84,7 @@ export default function Appbar() {
                 </Link>
             </MenuItem>
             <MenuItem>
-                <Link href={'/profile'} style={{color: '#000', textDecoration: 'none'}}>
+                <Link href={'/dashboard/profile'} style={{color: '#000', textDecoration: 'none'}}>
                     <Typography textAlign="center">Profile</Typography>
                 </Link>
             </MenuItem>
@@ -174,20 +125,12 @@ export default function Appbar() {
                         </Typography>
                     </Link>
                     {
-                        !showSearchBar ? <Box sx={{flexGrow: 1}}/> : null
+                        pathName !== '/all-services' ? <Box sx={{flexGrow: 1}}/> : null
                     }
-                    <Box sx={{flexGrow: 1, display: showSearchBar ? 'block' : 'none'}}>
+                    <Box sx={{flexGrow: 1, display: pathName === '/all-services' ? 'block' : 'none'}}>
                         <Box
                             sx={{display: 'flex', justifyContent: 'center'}}>
-                            <Search>
-                                <SearchIconWrapper>
-                                    <SearchIcon/>
-                                </SearchIconWrapper>
-                                <StyledInputBase
-                                    placeholder="Search…"
-                                    inputProps={{'aria-label': 'search'}}
-                                />
-                            </Search>
+                            <CustomSearch/>
                         </Box>
                     </Box>
                     <Box sx={{display: {xs: 'none', md: 'flex'}}}>
@@ -206,7 +149,13 @@ export default function Appbar() {
                                 </Button>
                             </Link>) : (<Box sx={{ml: 1}}>
                                 <Avatar sx={{cursor: 'pointer'}} onClick={handleOpenUserMenu}>
-                                    <PersonIcon/>
+                                    {
+                                        userImage && userImage !== '' ?
+                                            <Image src={userImage} alt={"user_image"} width={300}
+                                                   height={300}
+                                                   layout={'responsive'}/> :
+                                            <PersonIcon/>
+                                    }
                                 </Avatar>
                                 <Menu
                                     sx={{mt: '45px'}}
@@ -225,13 +174,15 @@ export default function Appbar() {
                                     onClose={handleCloseUserMenu}
                                 >
                                     <MenuItem onClick={handleCloseUserMenu}>
-                                        <Link href={'/profile'} style={{color: '#000', textDecoration: 'none'}}>
+                                        <Link href={'/dashboard/profile'}
+                                              style={{color: '#000', textDecoration: 'none'}}>
                                             <Typography textAlign="center">Profile</Typography>
                                         </Link>
                                     </MenuItem>
                                     <MenuItem>
-                                        <Link href={role === 'user' ? '/dashboard/user/bookings' : '/dashboard/manage-service'}
-                                              style={{color: '#000', textDecoration: 'none'}}>
+                                        <Link
+                                            href={role === 'user' ? '/dashboard/user/bookings' : '/dashboard/manage-service'}
+                                            style={{color: '#000', textDecoration: 'none'}}>
                                             <Typography textAlign="center">Dashboard</Typography>
                                         </Link>
                                     </MenuItem>

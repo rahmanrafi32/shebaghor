@@ -3,6 +3,9 @@ import type {NextPage} from 'next'
 import type {AppProps} from 'next/app'
 import {Provider} from "react-redux";
 import {store} from "@/redux/store";
+import isLoggedIn from "@/utils/isLoggedIn";
+import {useRouter} from "next/navigation";
+import {useEffect} from "react";
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
     getLayout?: (page: ReactElement) => ReactNode

@@ -5,6 +5,8 @@ import Toolbar from "@mui/material/Toolbar";
 import CircularProgress from '@mui/material/CircularProgress';
 import isLoggedIn from "@/utils/isLoggedIn";
 import {useRouter} from "next/navigation";
+import {store} from "@/redux/store";
+import {Provider} from "react-redux";
 
 type IProps = {
     children: ReactNode
@@ -30,12 +32,12 @@ const RootLayout = ({children}: IProps) => {
     }
 
     return (
-        <Fragment>
+        <Provider store={store}>
             <Appbar/>
             <Toolbar/>
-            <div className={'h-full'}>{children}</div>
+            <div style={{minHeight: '100vh'}}>{children}</div>
             <Footer/>
-        </Fragment>
+        </Provider>
     );
 };
 

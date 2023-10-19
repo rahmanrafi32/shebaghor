@@ -3,7 +3,7 @@ import Typography from "@mui/material/Typography";
 import loginImage from '../../assets/12146011_Wavy_Gen-01_Single-07.jpg'
 import Image from "next/image";
 import TextField from "@mui/material/TextField";
-import {Button, InputAdornment} from "@mui/material";
+import {AlertColor, Button, InputAdornment} from "@mui/material";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {z} from 'zod';
@@ -33,7 +33,7 @@ const Login = () => {
     const router = useRouter();
     const [open, setOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
-    const [severity, setSeverity] = useState('success');
+    const [severity, setSeverity] = useState<AlertColor>('success');
     const handleClickShowPassword = () => setShowPassword((show) => !show);
 
     const {register, handleSubmit, formState} = useForm<FormValues>({
@@ -54,7 +54,6 @@ const Login = () => {
             setToLocalStorage('user_email', decoded?.user);
             setToLocalStorage('user_role', decoded?.role);
             router.push('/');
-
         } catch (err: any) {
             setOpen(true);
             setSeverity('error');

@@ -4,13 +4,16 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Link from 'next/link'
-import {Card, CardActions, CardContent, CardMedia} from "@mui/material";
+import {AlertColor, Card, CardActions, CardContent, CardMedia} from "@mui/material";
 import Grid from "@mui/material/Grid";
 import DeleteServiceModal from "@/components/DeleteServiceModal";
 import {useDeleteServiceMutation, useGetAllServicesQuery} from "@/redux/api/serviceApi";
 import CustomSnackBar from "@/components/CustomSnackbar";
 import {getUserInfo} from "@/utils/getUserInfo";
 import {useRouter} from "next/navigation";
+import {Provider} from "react-redux";
+import {store} from "@/redux/store";
+import {useAppSelector} from "@/redux/hooks";
 
 type IService = {
     id: string,
@@ -25,11 +28,13 @@ const ManageServices = () => {
     const [modalMessage, setModalMessage] = useState<string>('')
     const [open, setOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
-    const [severity, setSeverity] = useState('success');
+    const [severity, setSeverity] = useState<AlertColor>('success');
     const user = getUserInfo() as any;
     const router = useRouter();
 
-    const {data, isLoading, isError} = useGetAllServicesQuery({});
+    const {name, searchTerm} = useAppSelector((state) => state.service.filterOptions)
+    const {data: services, isLoading} = useGetAllServicesQuery({name, searchTerm});
+
     const [deleteServiceApi] = useDeleteServiceMutation();
     const handleDelete = (service: IService) => {
         setDeleteService(service);
@@ -69,7 +74,7 @@ const ManageServices = () => {
             <Typography variant={'h5'} sx={{mb: 5}}>Service List</Typography>
             <Grid container direction={'row'} justifyContent={'center'} spacing={2}>
                 {
-                    data?.data?.map((service: IService, index: number) => (
+                    services?.data?.map((service: IService, index: number) => (
                         <Grid item xs={12} md={3} key={index}>
                             <Card sx={{maxWidth: 350}}>
                                 <CardMedia

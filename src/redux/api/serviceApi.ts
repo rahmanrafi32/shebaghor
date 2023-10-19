@@ -6,10 +6,15 @@ const URL = "/services";
 export const serviceApi = baseApi.injectEndpoints({
     endpoints: (build) => ({
         getAllServices: build.query({
-            query: () => ({
-                url: `${URL}`,
-                method: "GET",
-            }),
+            query: (arg) => {
+                const name = arg?.name;
+                const searchTerm = arg?.searchTerm;
+                return {
+                    url: `${URL}`,
+                    params: {name, searchTerm},
+                    method: "GET",
+                }
+            },
             providesTags: ["service"]
         }),
         getServiceById: build.query({

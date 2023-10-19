@@ -16,6 +16,7 @@ import Link from "next/link";
 import Box from "@mui/material/Box";
 import jwt_decode from "jwt-decode";
 import {setToLocalStorage} from "@/utils/local-storage";
+import {AlertColor} from "@mui/material";
 
 interface UserData {
     email: string;
@@ -44,7 +45,7 @@ const SignUp = () => {
     const router = useRouter();
     const [open, setOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
-    const [severity, setSeverity] = useState('success');
+    const [severity, setSeverity] = useState<AlertColor>('success');
 
     const [createUser] = useCreateUserMutation();
 
