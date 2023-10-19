@@ -37,7 +37,7 @@ interface DrawerItem {
 }
 
 const drawerWidth = 240;
-const Dashboard = ({children}: IProps) => {
+const MainDashboard = ({children}: IProps) => {
     const router = useRouter();
     const userLoggedIn = isLoggedIn();
     const [mobileOpen, setMobileOpen] = useState(false);
@@ -299,4 +299,4 @@ const Dashboard = ({children}: IProps) => {
     );
 };
 
-export default Dashboard;
+export default MainDashboard;

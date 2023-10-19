@@ -4,7 +4,7 @@ import isLoggedIn from "@/utils/isLoggedIn";
 import {useRouter} from "next/navigation";
 import {store} from "@/redux/store";
 import {Provider} from "react-redux";
-import Dashboard from "@/components/layouts/Dashboard";
+import MainDashboard from "@/components/MainDashboard";
 
 type IProps = {
     children: ReactNode
@@ -31,7 +31,7 @@ const DashboardLayout = ({children}: IProps) => {
 
     return (
         <Provider store={store}>
-            <Dashboard>{children}</Dashboard>
+            <MainDashboard>{children}</MainDashboard>
         </Provider>
     );
 };
