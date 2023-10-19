@@ -26,7 +26,7 @@ const Bookings = () => {
     const tableData = bookings?.data?.map((item: any) => [
         item.service?.name,
         item.service?.price,
-        moment.unix(item.bookingTime).format("LLL"),
+        moment(item.bookingTime).format("LLL"),
         item?.bookingStatus,
         item._id
     ]);
