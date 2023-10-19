@@ -87,7 +87,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({open, onClose, user, onEdi
                     </Grid>
                     <Grid item xs={4}>
                         <FormControl fullWidth>
-                            <InputLabel id="show-role">Age</InputLabel>
+                            <InputLabel id="show-role">Role</InputLabel>
                             <Select
                                 labelId="show-role"
                                 id="show-role"
