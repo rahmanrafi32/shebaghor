@@ -1,36 +1,24 @@
-import React, {ChangeEvent, ReactElement, useEffect, useState} from "react";
-import RootLayout from "@/components/layouts/RootLayout";
+import React, {useState, ChangeEvent, ReactElement, useEffect} from 'react';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import DashboardLayout from "@/components/layouts/DashboardLayout";
 import Grid from "@mui/material/Grid";
-import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
-import {useRouter} from "next/router";
 import Container from "@mui/material/Container";
-import {AlertColor, Button, FormControl, InputLabel, Select} from "@mui/material";
-import Box from "@mui/material/Box";
+import MenuItem from "@mui/material/MenuItem";
 import {useEditServiceMutation, useGetServiceByIdQuery} from "@/redux/api/serviceApi";
-import IconButton from "@mui/material/IconButton";
-import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
-import Image from "next/image";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import {styled} from "@mui/material/styles";
+import {useRouter} from "next/router";
 import axios from "axios";
 import {getPublicIdFromUrl, handleDeleteImage} from "@/utils/deleteImage";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import Image from "next/image";
+import {styled} from "@mui/material/styles";
+import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import RemoveIcon from "@mui/icons-material/Remove";
+import CircularProgress from "@mui/material/CircularProgress";
+import {AlertColor} from "@mui/material";
 import CustomSnackBar from "@/components/CustomSnackbar";
-import {getUserInfo} from "@/utils/getUserInfo";
-import MenuItem from "@mui/material/MenuItem";
 
-type editData = {
-    id: string;
-    name: string;
-    price: string;
-    category: string;
-    image: string;
-    whatsInclude: string[];
-    whatsExclude: string[];
-    details: string;
-    serviceType: string;
-};
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -44,32 +32,43 @@ const VisuallyHiddenInput = styled('input')({
     width: 1,
 });
 
+interface EditData {
+    id: string;
+    name: string;
+    price: string;
+    category: string;
+    image: string;
+    whatsInclude: string[];
+    whatsExclude: string[];
+    details: string;
+    serviceType: string;
+}
+
 const EditService = () => {
     const {query} = useRouter();
     const id = query.id as string;
     const router = useRouter();
-    const {data: service, isLoading} = useGetServiceByIdQuery(id);
-    const [editService] = useEditServiceMutation();
     const [open, setOpen] = useState(false);
-    const [editData, setEditData] = useState<editData>({
-        id: "",
-        name: "",
-        price: "",
-        category: "",
-        image: "",
+    const [snackbarMessage, setSnackbarMessage] = useState("");
+    const [severity, setSeverity] = useState<AlertColor>('success');
+    const [editedData, setEditedData] = useState<EditData>({
+        id: '',
+        name: '',
+        price: '',
+        category: '',
+        image: '',
         whatsInclude: [],
         whatsExclude: [],
         details: '',
-        serviceType: ''
+        serviceType: '',
     });
-    const [snackbarMessage, setSnackbarMessage] = useState("");
-    const [severity, setSeverity] = useState<AlertColor>('success');
-    const {name, price, category, whatsInclude, whatsExclude, image, details, serviceType} = editData;
-    const user = getUserInfo() as any;
+
+    const {data: service, isLoading} = useGetServiceByIdQuery(id);
+    const [editService] = useEditServiceMutation();
 
     useEffect(() => {
         if (service && service.data) {
-            setEditData({
+            setEditedData({
                 id,
                 name: service.data.name,
                 price: service.data.price,
@@ -77,51 +76,45 @@ const EditService = () => {
                 category: service.data.category,
                 whatsInclude: service.data.whatsInclude || [],
                 whatsExclude: service.data.whatsExclude || [],
-                details: service.data.details,
-                serviceType: service.data.serviceType,
+                details: service.data.details || '',
+                serviceType: service.data.serviceType || ""
             });
         }
     }, [id, service]);
-
-    const handleFormChange = (field: keyof editData, value: string | string[]) => {
-        setEditData({
-            ...editData,
-            [field]: value,
-        });
+    const handleFieldChange = (
+        field: keyof EditData,
+        value: string
+    ) => {
+        setEditedData({...editedData, [field]: value});
     };
 
-    // const addNewField = (field: keyof editData) => {
-    //     setEditData({
-    //         ...editData,
-    //         [field]: [...editData[field], ""],
-    //     });
-    // };
-    //
-    // const removeField = (field: string, index: number) => {
-    //     const updatedArray = [...editData[field]];
-    //     updatedArray.splice(index, 1);
-    //     setEditData({
-    //         ...editData,
-    //         [field]: updatedArray,
-    //     });
-    // };
-
-    const addNewField = (field: 'whatsInclude' | 'whatsExclude') => {
-        const updatedData = {...editData};
-        updatedData[field].push('');
-        setEditData(updatedData);
+    const handleArrayChange = (
+        field: 'whatsInclude' | 'whatsExclude',
+        value: string,
+        index: number
+    ) => {
+        const updatedArray = [...editedData[field]];
+        updatedArray[index] = value;
+        setEditedData({...editedData, [field]: updatedArray});
     };
 
-    const removeField = (field: 'whatsInclude' | 'whatsExclude', index: number) => {
-        const updatedData = {...editData};
-        updatedData[field].splice(index, 1);
-        setEditData(updatedData);
+    const handleAddArrayItem = (field: 'whatsInclude' | 'whatsExclude') => {
+        setEditedData({...editedData, [field]: [...editedData[field], '']});
+    };
+
+    const handleRemoveArrayItem = (
+        field: 'whatsInclude' | 'whatsExclude',
+        index: number
+    ) => {
+        const updatedArray = [...editedData[field]];
+        updatedArray.splice(index, 1);
+        setEditedData({...editedData, [field]: updatedArray});
     };
 
     const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
         const cloudName = process.env.NEXT_PUBLIC_CLOUD_NAME as string;
         const preset = process.env.NEXT_PUBLIC_UPLOAD_PRESET as string;
-        const publicId = getPublicIdFromUrl(editData.image);
+        const publicId = getPublicIdFromUrl(editedData.image);
         const {data}: any = await handleDeleteImage(publicId);
 
         const file = event.target.files?.[0];
@@ -138,7 +131,7 @@ const EditService = () => {
                 const response = await axios.request(config);
                 if (response && response.data && response.data.secure_url) {
                     const imageUrl = response.data.secure_url;
-                    setEditData((prevServiceData) => ({
+                    setEditedData((prevServiceData) => ({
                         ...prevServiceData,
                         image: imageUrl,
                     }));
@@ -149,183 +142,163 @@ const EditService = () => {
         }
     };
 
-    const handleEditSubmitButton = async () => {
-        const response = await editService(editData).unwrap();
-        if (response.success) {
+    const handleSave = async () => {
+        try {
+            const response = await editService(editedData).unwrap();
+            if (response.success) {
+                setOpen(true);
+                setSeverity('success');
+                setSnackbarMessage(response.message)
+                setTimeout(() => {
+                    router.push('/dashboard/manage-service');
+                }, 2100);
+            }
+        } catch (error: any) {
             setOpen(true);
-            setSeverity('success');
-            setSnackbarMessage('Service edited successfully')
-            setTimeout(() => {
-                router.push('/dashboard/manage-service');
-            }, 2100);
+            setSeverity('error');
+            setSnackbarMessage(error.data)
         }
-    }
-
-    useEffect(() => {
-        if (user.role === 'user') {
-            router.push('/')
-        }
-    }, [router, user]);
+    };
 
     return (
         <Container>
-            <Typography variant={'h3'} align={'center'} sx={{m: 3}}>Edit Service</Typography>
-            <Grid container spacing={2}>
-                <Grid item xs={6}>
-                    <TextField
-                        fullWidth
-                        label="Service Name"
-                        variant="outlined"
-                        value={name}
-                        onChange={(e) => handleFormChange("name", e.target.value)}
-                    />
-                </Grid>
-                <Grid item xs={6}>
-                    <TextField
-                        fullWidth
-                        label="Price"
-                        variant="outlined"
-                        value={price}
-                        onChange={(e) => handleFormChange("price", e.target.value)}
-                    />
-                </Grid>
-                <Grid item xs={6} sx={{display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
-                    {
-                        image ? <Image
-                            src={image}
-                            alt={'service image'}
-                            width={200}
-                            height={200}
-                            style={{marginLeft: '20px'}}
-                        /> : null
-                    }
-                    <Button
-                        component="label"
-                        variant="contained"
-                        startIcon={<CloudUploadIcon/>}
-                        sx={{width: {md: '10vw'}, mt: 2, ml: {md: 2}}}
-                    >
-                        Upload file
-                        <VisuallyHiddenInput type="file" onChange={handleFileChange}/>
-                    </Button>
-                </Grid>
-                <Grid item xs={6}>
-                    <TextField
-                        fullWidth
-                        label="Service Details"
-                        multiline
-                        maxRows={4}
-                        variant="outlined"
-                        value={details}
-                        onChange={(e) => handleFormChange("details", e.target.value)}
-                    />
-                </Grid>
-                <Grid item xs={6}>
-                    <FormControl fullWidth>
-                        <InputLabel id="demo-simple-select-label">Service Type</InputLabel>
-                        <Select
-                            labelId="demo-simple-select-label"
-                            id="demo-simple-select"
-                            value={serviceType}
-                            label="Service Type"
-                            onChange={(e) => handleFormChange('serviceType', e.target.value)}
+            {
+                isLoading ?
+                    <Box sx={{minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                        <CircularProgress/>
+                    </Box> : (<Grid container spacing={2}>
+                        <Grid item xs={12} md={6}>
+                            <TextField
+                                label="Name"
+                                fullWidth
+                                value={editedData.name}
+                                onChange={(e) => handleFieldChange('name', e.target.value)}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <TextField
+                                label="Price"
+                                fullWidth
+                                value={editedData.price}
+                                onChange={(e) => handleFieldChange('price', e.target.value)}
+                            />
+                        </Grid>
+                        <Grid item xs={6} sx={{display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
+                            {
+                                editedData.image ? <Image
+                                    src={editedData.image}
+                                    alt={'service image'}
+                                    width={200}
+                                    height={200}
+                                    style={{marginLeft: '20px'}}
+                                /> : null
+                            }
+                            <Button
+                                component="label"
+                                variant="contained"
+                                startIcon={<CloudUploadIcon/>}
+                                sx={{width: {md: '10vw'}, mt: 2, ml: {md: 2}}}
+                            >
+                                Upload file
+                                <VisuallyHiddenInput type="file" onChange={handleFileChange}/>
+                            </Button>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <TextField
+                                label="Details"
+                                fullWidth
+                                multiline
+                                maxRows={10}
+                                value={editedData.details}
+                                onChange={(e) => handleFieldChange('details', e.target.value)}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <TextField
+                                label="Service Type"
+                                fullWidth
+                                select
+                                value={editedData.serviceType}
+                                onChange={(e) => handleFieldChange('serviceType', e.target.value)}
+                            >
+                                <MenuItem value="featured">Featured</MenuItem>
+                                <MenuItem value="regular">Regular</MenuItem>
+                                <MenuItem value="upcoming">Upcoming</MenuItem>
+                            </TextField>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                label="Category"
+                                fullWidth
+                                value={editedData.category}
+                                onChange={(e) => handleFieldChange('category', e.target.value)}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Box>
+                                <p>Whats Included:</p>
+                                {editedData.whatsInclude.map((item, index) => (
+                                    <Box key={index} display="flex" alignItems="center">
+                                        <TextField
+                                            fullWidth
+                                            value={item}
+                                            label={`Item ${index + 1}`}
+                                            sx={{mt: 2}}
+                                            onChange={(e) =>
+                                                handleArrayChange('whatsInclude', e.target.value, index)
+                                            }
+                                        />
+                                        <IconButton
+                                            color="error"
+                                            aria-label="remove"
+                                            onClick={() => handleRemoveArrayItem('whatsInclude', index)}
+                                        >
+                                            <RemoveIcon/>
+                                        </IconButton>
+                                    </Box>
+                                ))}
+                                <Button onClick={() => handleAddArrayItem('whatsInclude')}>
+                                    Add Item
+                                </Button>
+                            </Box>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Box>
+                                <p>Whats Excluded:</p>
+                                {editedData.whatsExclude.map((item, index) => (
+                                    <Box key={index} display="flex" alignItems="center">
+                                        <TextField
+                                            fullWidth
+                                            label={`Item ${index + 1}`}
+                                            sx={{mt: 2}}
+                                            value={item}
+                                            onChange={(e) =>
+                                                handleArrayChange('whatsExclude', e.target.value, index)
+                                            }
+                                        />
+                                        <IconButton
+                                            color="error"
+                                            aria-label="remove"
+                                            onClick={() => handleRemoveArrayItem('whatsExclude', index)}
+                                        >
+                                            <RemoveIcon/>
+                                        </IconButton>
+                                    </Box>
+                                ))}
+                                <Button onClick={() => handleAddArrayItem('whatsExclude')}>
+                                    Add Item
+                                </Button>
+                            </Box>
+                        </Grid>
+                        <Grid item
+                              xs={12}
+                              sx={{display: 'flex', justifyContent: 'center'}}
                         >
-                            <MenuItem value={'regular'}>Regular</MenuItem>
-                            <MenuItem value={'featured'}>Featured</MenuItem>
-                            <MenuItem value={'upcoming'}>Upcoming</MenuItem>
-                        </Select>
-                    </FormControl>
-                </Grid>
-                <Grid item xs={6}>
-                    <TextField
-                        fullWidth
-                        variant="outlined"
-                        value={category}
-                        label="Category"
-                        onChange={(e) => handleFormChange("category", e.target.value)}
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <Typography variant="h6">What&apos;s Included</Typography>
-                    {whatsInclude.map((item, index: number) => (
-                        <Box key={index} display="flex" alignItems="center">
-                            <TextField
-                                fullWidth
-                                label={`Item ${index + 1}`}
-                                variant="outlined"
-                                value={item}
-                                onChange={(e) =>
-                                    handleFormChange("whatsInclude", [
-                                        ...whatsInclude.slice(0, index),
-                                        e.target.value,
-                                        ...whatsInclude.slice(index + 1),
-                                    ])
-                                }
-                                sx={{mt: 2}}
-                            />
-                            <IconButton
-                                color="error"
-                                aria-label="remove"
-                                onClick={() => removeField("whatsInclude", index)}
-                            >
-                                <RemoveIcon/>
-                            </IconButton>
-                            <IconButton
-                                color="primary"
-                                aria-label="add"
-                                onClick={() => addNewField("whatsInclude")}
-                            >
-                                <AddIcon/>
-                            </IconButton>
-                        </Box>
-                    ))}
-                </Grid>
-                <Grid item xs={12}>
-                    <Typography variant="h6">What&apos;s Excluded</Typography>
-                    {whatsExclude.map((item, index: number) => (
-                        <Box key={index} display="flex" alignItems="center">
-                            <TextField
-                                fullWidth
-                                label={`Item ${index + 1}`}
-                                variant="outlined"
-                                value={item}
-                                onChange={(e) =>
-                                    handleFormChange("whatsExclude", [
-                                        ...whatsInclude.slice(0, index),
-                                        e.target.value,
-                                        ...whatsInclude.slice(index + 1),
-                                    ])
-                                }
-                                sx={{mt: 2}}
-                            />
-                            <IconButton
-                                color="error"
-                                aria-label="remove"
-                                onClick={() => removeField("whatsExclude", index)}
-                            >
-                                <RemoveIcon/>
-                            </IconButton>
-                            <IconButton
-                                color="primary"
-                                aria-label="add"
-                                onClick={() => addNewField("whatsExclude")}
-                            >
-                                <AddIcon/>
-                            </IconButton>
-                        </Box>
-                    ))}
-                </Grid>
-                <Grid item xs={12} sx={{display: "flex", justifyContent: "center"}}>
-                    <Button
-                        variant={"contained"}
-                        color={"secondary"}
-                        size={"large"}
-                        onClick={handleEditSubmitButton}
-                    >
-                        Submit
-                    </Button>
-                </Grid>
-            </Grid>
+                            <Button variant={'contained'} color={'secondary'} size={'large'} onClick={handleSave}>Edit
+                                Service</Button>
+                        </Grid>
+                    </Grid>)
+            }
             <CustomSnackBar
                 open={open}
                 setOpen={setOpen}
@@ -339,5 +312,5 @@ const EditService = () => {
 export default EditService;
 
 EditService.getLayout = function getLayout(page: ReactElement) {
-    return <RootLayout>{page}</RootLayout>;
-};
+    return (<DashboardLayout>{page}</DashboardLayout>)
+}

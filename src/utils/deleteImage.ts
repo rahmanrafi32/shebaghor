@@ -35,7 +35,7 @@ export const handleDeleteImage = async (publicId: string | null) => {
             },
         });
         if(response && response.data)
-            return response.data;
+            return response;
     } catch (error) {
         console.error(error);
     }

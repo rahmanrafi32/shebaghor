@@ -269,7 +269,7 @@ const AddService = () => {
                                 serviceData.image === '' ||
                                 serviceData.price === '' ||
                                 serviceData.category === '' ||
-                                serviceData.serviceType === ''
+                                serviceData.details === ''
                             }
                         >
                             Create Service
